@@ -213,7 +213,7 @@ function getStayDuration() {
     if (Math.random() < travelingPopulationPercentage) {
         return getSkewedRandomValue(2, 14, 1);
     }
-    return getSkewedRandomValue(120, 180, 1);
+    return getSkewedRandomValue(80, 180, 1);
 }
 
 
@@ -505,7 +505,7 @@ function showToast(textInput) {
         duration: 3000,
         close: true,
         gravity: "top", // `top` or `bottom`
-        position: 'left', // `left`, `center` or `right`
+        position: 'center', // `left`, `center` or `right`
         style: {
             background: "linear-gradient(to right, #00b09b, #96c93d)"
         },
@@ -802,6 +802,7 @@ document.getElementById('covid19').addEventListener('click', function() {
     });
     // click on randomizeButton to randomize the grid
     document.getElementById('randomizeButton').click();
+    showToast("COVID-19 Preset Loaded! 😷");
 });
 
 document.getElementById('ebola').addEventListener('click', function() {
@@ -827,6 +828,7 @@ document.getElementById('ebola').addEventListener('click', function() {
     });
     // click on randomizeButton to randomize the grid
     document.getElementById('randomizeButton').click();
+    showToast("Ebola Preset Loaded! 😷");
 });
 
 document.getElementById('hiv').addEventListener('click', function() {
@@ -852,6 +854,7 @@ document.getElementById('hiv').addEventListener('click', function() {
     });
     // click on randomizeButton to randomize the grid
     document.getElementById('randomizeButton').click();
+    showToast("HIV Preset Loaded! 😷");
 });
 
 document.getElementById('hiv-with-PrEP').addEventListener('click', function() {
@@ -877,6 +880,33 @@ document.getElementById('hiv-with-PrEP').addEventListener('click', function() {
     });
     // click on randomizeButton to randomize the grid
     document.getElementById('randomizeButton').click();
+    showToast("HIV with PrEP Preset Loaded! 😷");
+});
+
+document.getElementById('flu').addEventListener('click', function() {
+    setPresetValues({
+        initialSick: 1,
+        transmissibilityMin: 3,
+        transmissibilityMax: 10,
+        simulationSpeed: 10,
+        severityLevelMin: 1,
+        severityLevelMax: 3,
+        skewnessSlider: 3,
+        healSpeedMin: 10,
+        healSpeedMax: 15,
+        healingInfectionChance_ReductionMultipler: 0.5,
+        healedReInfectionChance_ReductionMultipler: 0.1,
+        healChanceMin: 15,
+        healChanceMax: 20,
+        healChanceSkewness: 1,
+        incubationInfectionRateMultiplier: 0.7,
+        incubationReducedSeverityMultiplier: 0.6,
+        incubationPhaseDurationMin: 1,
+        incubationPhaseDurationMax: 4
+    });
+    // click on randomizeButton to randomize the grid
+    document.getElementById('randomizeButton').click();
+    showToast("Flu Preset Loaded! 😷");
 });
 
 function setValueAndDispatchEvent(elementId, value) {

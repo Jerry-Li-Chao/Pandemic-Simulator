@@ -24,13 +24,22 @@ document.addEventListener("DOMContentLoaded", function () {
     button.addEventListener("click", function () {
         if (list.style.display === "none" || list.style.display === "") {
             list.style.display = "block";
+            button.classList.add("active");
+            button.classList.remove("shake");
             button.textContent = "Hide Guide";
         } else {
             list.style.display = "none";
+            button.classList.remove("active");
+            button.classList.add("shake");
             button.textContent = "Show Guide";
         }
     });
+
+    button.addEventListener("animationend", function () {
+        button.classList.remove("shake");
+    });
 });
+
 
 
 const translations = {
