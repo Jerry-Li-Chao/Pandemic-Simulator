@@ -90,7 +90,7 @@ const skewnessSlider = document.getElementById('skewnessSlider');
 const skewnessValue = document.getElementById('skewnessValue');
 
 function updateSeverityLevelRange() {
-    if (parseInt(severityLevelMin.value) > parseInt(severityLevelMax.value)) {
+    if (parseFloat(severityLevelMin.value) > parseFloat(severityLevelMax.value)) {
         severityLevelMin.value = severityLevelMax.value;
     }
 
@@ -268,8 +268,8 @@ function getHealSpeed() {
 
 // getSeverityLevel use skewness to skew the distribution
 function getSeverityLevel() {
-    const minSeverityLevel = parseInt(severityLevelMin.value);
-    const maxSeverityLevel = parseInt(severityLevelMax.value);
+    const minSeverityLevel = parseFloat(severityLevelMin.value);
+    const maxSeverityLevel = parseFloat(severityLevelMax.value);
     const skewness = parseFloat(skewnessSlider.value);
     return getSkewedRandomValue(minSeverityLevel, maxSeverityLevel, skewness);
 }
@@ -497,8 +497,7 @@ let populationChart = new Chart(chartCtx, {
 });
 
 
-let previousCounts = { healthy: 0, sick: 0, healed: 0, dead: 0 };
-let unchangedIterations = 0;
+
 
 function showToast(textInput) {
     Toastify({
@@ -506,13 +505,16 @@ function showToast(textInput) {
         duration: 3000,
         close: true,
         gravity: "top", // `top` or `bottom`
-        position: 'right', // `left`, `center` or `right`
+        position: 'left', // `left`, `center` or `right`
         style: {
             background: "linear-gradient(to right, #00b09b, #96c93d)"
         },
         stopOnFocus: true, // Prevents dismissing of toast on hover
     }).showToast();
 }
+
+let prevTotalHealth = 0;
+let unchangedIterations = 0;
 
 function updateChart() {
     let healthyCount = 0, sickCount = 0, healedCount = 0, deadCount = 0;
@@ -544,11 +546,8 @@ function updateChart() {
     // Calculate the average health
     let averageHealth = totalHealth / totalCells;
 
-     // Check if counts have changed
-     if (healthyCount === previousCounts.healthy && 
-        sickCount === previousCounts.sick && 
-        healedCount === previousCounts.healed && 
-        deadCount === previousCounts.dead) {
+    // Check if totalHealth has changed
+    if (totalHealth === prevTotalHealth) {
         unchangedIterations++;
         if (unchangedIterations >= 20) {
             isRunning = false; // Stop the simulation
@@ -556,27 +555,23 @@ function updateChart() {
             toggleButton.classList.remove('stop');
             toggleButton.classList.add('start');
             toggleButton.textContent = 'Start';
-            unchangedIterations = 0
-            if(averageHealth > 90){
-                showToast("Pandemic Ended! We are still Healthy! 😊");
-            }
-            else if(averageHealth > 80){
+            unchangedIterations = 0;
+            if (averageHealth > 90) {
+                showToast("Pandemic Ended! We are still Relatively Healthy! 😊");
+            } else if (averageHealth > 80) {
                 showToast("Pandemic Ended! Stay Strong, Guys! 💪");
-            }
-            else if(averageHealth > 60){
+            } else if (averageHealth > 60) {
                 showToast("Pandemic Ended! We will recover! 😷");
-            }
-            else{
+            } else {
                 showToast("Pandemic Ended! What a Deadly Pandemic! 😢");
             }
-            
         }
     } else {
-        unchangedIterations = 0; // Reset the counter if counts have changed
+        unchangedIterations = 0; // Reset the counter if totalHealth has changed
     }
 
-    // Update previous counts
-    previousCounts = { healthy: healthyCount, sick: sickCount, healed: healedCount, dead: deadCount };
+    // Update previous totalHealth
+    prevTotalHealth = totalHealth;
 
     let currentTimeStep = populationChart.data.labels.length + 1;
     populationChart.data.labels.push(currentTimeStep);
@@ -650,6 +645,11 @@ function updateGrid() {
                 nextGrid[y][x].sickDays++;
                 if (nextGrid[y][x].sickDays >= nextGrid[y][x].incubationPhaseDuration) {
                     nextGrid[y][x].state = STATES.SYMPTOMATIC;
+                    nextGrid[y][x].health -= getSeverityLevel();
+                    if (nextGrid[y][x].health <= 0) {
+                        nextGrid[y][x].state = STATES.DEAD;
+                        nextGrid[y][x].health = 0;
+                    }
                 } else {
                     nextGrid[y][x].health -= getSeverityLevel() * incubationReducedSeverityMultiplier;
                 }
@@ -781,12 +781,12 @@ document.getElementById('incubationReducedSeverityMultiplier').addEventListener(
 // I want to modify the setPresetValues() to pass in the values, instead of hard code the values
 document.getElementById('covid19').addEventListener('click', function() {
     setPresetValues({
-        initialSick: 1,
+        initialSick: 2,
         transmissibilityMin: 2,
         transmissibilityMax: 5,
         simulationSpeed: 20,
-        severityLevelMin: 2,
-        severityLevelMax: 5,
+        severityLevelMin: 3,
+        severityLevelMax: 6,
         skewnessSlider: 3,
         healSpeedMin: 2,
         healSpeedMax: 7,
@@ -804,6 +804,81 @@ document.getElementById('covid19').addEventListener('click', function() {
     document.getElementById('randomizeButton').click();
 });
 
+document.getElementById('ebola').addEventListener('click', function() {
+    setPresetValues({
+        initialSick: 1,
+        transmissibilityMin: 1.3,
+        transmissibilityMax: 2.7,
+        simulationSpeed: 20,
+        severityLevelMin: 5,
+        severityLevelMax: 7,
+        skewnessSlider: 0.5,
+        healSpeedMin: 3,
+        healSpeedMax: 5,
+        healingInfectionChance_ReductionMultipler: 0.3,
+        healedReInfectionChance_ReductionMultipler: 0.1,
+        healChanceMin: 3.5,
+        healChanceMax: 7,
+        healChanceSkewness: 1,
+        incubationInfectionRateMultiplier: 1.5,
+        incubationReducedSeverityMultiplier: 0.3,
+        incubationPhaseDurationMin: 2,
+        incubationPhaseDurationMax: 10
+    });
+    // click on randomizeButton to randomize the grid
+    document.getElementById('randomizeButton').click();
+});
+
+document.getElementById('hiv').addEventListener('click', function() {
+    setPresetValues({
+        initialSick: 1,
+        transmissibilityMin: 0.05,
+        transmissibilityMax: 0.1,
+        simulationSpeed: 40,
+        severityLevelMin: 0.05,
+        severityLevelMax: 0.1,
+        skewnessSlider: 1,
+        healSpeedMin: 0,
+        healSpeedMax: 0,
+        healingInfectionChance_ReductionMultipler: 1,
+        healedReInfectionChance_ReductionMultipler: 1,
+        healChanceMin: 0,
+        healChanceMax: 0,
+        healChanceSkewness: 1,
+        incubationInfectionRateMultiplier: 1,
+        incubationReducedSeverityMultiplier: 0.1,
+        incubationPhaseDurationMin: 730,
+        incubationPhaseDurationMax: 3650
+    });
+    // click on randomizeButton to randomize the grid
+    document.getElementById('randomizeButton').click();
+});
+
+document.getElementById('hiv-with-PrEP').addEventListener('click', function() {
+    setPresetValues({
+        initialSick: 1,
+        transmissibilityMin: 0.05,
+        transmissibilityMax: 0.1,
+        simulationSpeed: 40,
+        severityLevelMin: 0.05,
+        severityLevelMax: 0.1,
+        skewnessSlider: 1,
+        healSpeedMin: 0,
+        healSpeedMax: 0,
+        healingInfectionChance_ReductionMultipler: 1,
+        healedReInfectionChance_ReductionMultipler: 1,
+        healChanceMin: 0,
+        healChanceMax: 0,
+        healChanceSkewness: 1,
+        incubationInfectionRateMultiplier: 0.1,
+        incubationReducedSeverityMultiplier: 0.01,
+        incubationPhaseDurationMin: 5475,
+        incubationPhaseDurationMax: 5475
+    });
+    // click on randomizeButton to randomize the grid
+    document.getElementById('randomizeButton').click();
+});
+
 function setValueAndDispatchEvent(elementId, value) {
     const element = document.getElementById(elementId);
     element.value = value;
@@ -815,20 +890,20 @@ function setPresetValues(values) {
     setValueAndDispatchEvent('transmissibilityMin', values.transmissibilityMin);
     setValueAndDispatchEvent('transmissibilityMax', values.transmissibilityMax);
     setValueAndDispatchEvent('simulationSpeed', values.simulationSpeed);
-    setValueAndDispatchEvent('severityLevelMin', values.severityLevelMin);
     setValueAndDispatchEvent('severityLevelMax', values.severityLevelMax);
+    setValueAndDispatchEvent('severityLevelMin', values.severityLevelMin);
     setValueAndDispatchEvent('skewnessSlider', values.skewnessSlider);
-    setValueAndDispatchEvent('healSpeedMin', values.healSpeedMin);
     setValueAndDispatchEvent('healSpeedMax', values.healSpeedMax);
+    setValueAndDispatchEvent('healSpeedMin', values.healSpeedMin);
     setValueAndDispatchEvent('healingInfectionChance_ReductionMultipler', values.healingInfectionChance_ReductionMultipler);
     setValueAndDispatchEvent('healedReInfectionChance_ReductionMultipler', values.healedReInfectionChance_ReductionMultipler);
-    setValueAndDispatchEvent('healChanceMin', values.healChanceMin);
     setValueAndDispatchEvent('healChanceMax', values.healChanceMax);
+    setValueAndDispatchEvent('healChanceMin', values.healChanceMin);
     setValueAndDispatchEvent('healChanceSkewness', values.healChanceSkewness);
     setValueAndDispatchEvent('incubationInfectionRateMultiplier', values.incubationInfectionRateMultiplier);
     setValueAndDispatchEvent('incubationReducedSeverityMultiplier', values.incubationReducedSeverityMultiplier);
-    setValueAndDispatchEvent('incubationPhaseDurationMin', values.incubationPhaseDurationMin);
     setValueAndDispatchEvent('incubationPhaseDurationMax', values.incubationPhaseDurationMax);
+    setValueAndDispatchEvent('incubationPhaseDurationMin', values.incubationPhaseDurationMin);
 
     // Update display for any sliders or ranges
     updateTransmissibilityRange();

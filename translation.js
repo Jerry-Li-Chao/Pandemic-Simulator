@@ -17,6 +17,22 @@ let isChinese = false;
 //     this.textContent = isChinese ? 'English' : 'Chinese';
 // });
 
+document.addEventListener("DOMContentLoaded", function () {
+    const button = document.querySelector(".collapsible");
+    const list = document.querySelector(".collapsible-list");
+
+    button.addEventListener("click", function () {
+        if (list.style.display === "none" || list.style.display === "") {
+            list.style.display = "block";
+            button.textContent = "Hide Guide";
+        } else {
+            list.style.display = "none";
+            button.textContent = "Show Guide";
+        }
+    });
+});
+
+
 const translations = {
     "Start": {
         "zh": "开始"
@@ -27,7 +43,7 @@ const translations = {
     "Make All Healthy":{
         "zh":"使所有人健康"
     },
-    "Press down 'Shift' to draw your own initial infected population":{
+    "Hold down 'Shift' to draw your own initial infected population":{
         "zh":"按下“Shift”以绘制自己的初始感染人口"
     },
     "Gradient of Green to Red: indicates the level of healthiness of that person":{
