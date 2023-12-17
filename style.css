@@ -1,9 +1,43 @@
 body {
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
     font-family: 'Roboto', sans-serif;
     padding: 20px;
     background-color: #f4f4f4;
+}
+
+#topbar {
+    background-color: #f8f9fa;
+    padding: 10px;
+    display: flex;
+    justify-content: flex-end;
+    border-bottom: 1px solid #e9ecef;
+    width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+#languageToggle {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition-duration: 0.4s;
+}
+
+#languageToggle:hover {
+    background-color: white; 
+    color: black; 
+    border: 2px solid #007bff;
 }
 
 .start {
@@ -78,25 +112,51 @@ ul {
     
 }
 
-#test {
-    width: 80%;
-    margin: 0 auto;
-    background-color: #fff;
-    padding: 20px;
-    box-shadow: 0px 0px 10px #bbb;
+#controlsAndCharts {
+    display: flex;
+    justify-content:center;
+    flex-wrap: nowrap;
 }
 
 #controls {
-    width: 30%; /* Adjust as needed */
+    flex: 0 0 220px;
+    margin: 0 2%;
+    width: 20%;
     display: flex;
     flex-direction: column;
 }
 
 #test {
-    width: 60%; /* Adjust as needed */
-    display: flex;
+    background-color: #fff;
+    padding: 20px 10px;
+    box-shadow: 0px 0px 10px #bbb;
+    width: 60%; 
+    display: inline-block;
     flex-direction: column;
+    flex: 0 1 60%;
+    margin: 0 2%;
 }
+
+/* media queries */
+@media screen and (max-width: 768px) {
+    #controlsAndCharts {
+        flex-direction: column;
+        /* center children */
+        align-items: center;
+    }
+
+    #controls {
+        width: 90%;
+        margin: 0;
+    }
+
+    #test {
+        width: 90%;
+        margin: 0;
+    }
+}
+
+
 
 h1 {
     text-align: center;
@@ -107,6 +167,12 @@ h1 {
     display: block;
     margin: 20px auto;
 }
+
+/* #populationChart {
+    width: 100%;
+    height: 500px;
+    margin: 0 auto;
+} */
 
 #controls {
     display: flex;
@@ -126,5 +192,12 @@ h1 {
 
 #controls input {
     margin: 5px 0;
+}
+
+input[type="range"] {
     width: 100%;
+}
+
+input[type="number"] {
+    width: 30%;
 }

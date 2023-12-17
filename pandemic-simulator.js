@@ -134,6 +134,88 @@ healChanceSkewness.addEventListener('input', updateHealChanceSkewnessValue);
 updateHealChanceRange();
 updateHealChanceSkewnessValue();
 
+const travelPercentage = document.getElementById('travelPercentage');
+const travelPercentageValue = document.getElementById('travelPercentageValue');
+
+function updateTravelPercentage() {
+    travelPercentageValue.textContent = `${travelPercentage.value}%`;
+}
+
+travelPercentage.addEventListener('input', updateTravelPercentage);
+updateTravelPercentage(); // Initial call to set the text
+
+
+function applyTravelRestriction() {
+    const isTravelRestricted = document.getElementById('travelRestriction').checked;
+    const travelPercent = parseFloat(travelPercentage.value) / 100;
+
+    if (!isTravelRestricted) {
+        // Logic to replace a percentage of the population
+        for (let y = 0; y < gridHeight; y++) {
+            for (let x = 0; x < gridWidth; x++) {
+                if (Math.random() < travelPercent) {
+                    if (isValidForTravelReplacement(grid[y][x])) {
+                        grid[y][x] = getNewCellState(); // Implement this function
+                    }
+                }
+            }
+        }
+    }
+}
+
+function isValidForTravelReplacement(cell) {
+    state = cell.state;
+    health = cell.health;
+    let flag = (cell.stayed >= cell.stayingFor);
+    return (state === STATES.HEALTHY || 
+           state === STATES.HEALED || 
+           state === STATES.INCUBATING || 
+           (state === STATES.SYMPTOMATIC && health >= 50))
+           && flag;
+}
+
+function getNewCellState() {
+    let newState;
+    const randomState = Math.random();
+    if (randomState < 0.75) {
+        newState = STATES.HEALTHY;
+    } else if (randomState < 0.95) {
+        newState = STATES.INCUBATING;
+    } else {
+        newState = STATES.SYMPTOMATIC; // Ensured health is >= 50
+    }
+
+    let duration = getIncubationDuration()
+    // newState is SYMPTOMATIC, sickDays should be duration
+    // newState is INCUBATING, sickDays should a random of range of 0 to duration
+    let sd = 0;
+    if(newState === STATES.SYMPTOMATIC){
+        sd = duration;
+    }
+    else if (newState === STATES.INCUBATING){
+        sd = Math.floor(Math.random() * duration);
+    }
+
+    return {
+        state: newState,
+        health: (newState === STATES.SYMPTOMATIC) ? 50 + Math.random() * 35 : 100,
+        sickDays: sd,
+        incubationPhaseDuration: duration,
+        healSpeed: getHealSpeed(),
+        stayingFor: getStayDuration(),
+        stayed: 0
+    };
+}
+
+// Function that generate a value for stayingFor
+function getStayDuration() {
+    let travelingPopulationPercentage = parseFloat(travelPercentage.value)
+    if (Math.random() < travelingPopulationPercentage) {
+        return getSkewedRandomValue(2, 14, 1);
+    }
+    return getSkewedRandomValue(120, 180, 1);
+}
+
 
 function generateNormallyDistributedValue(mean, stdDev) {
     let u = 0, v = 0;
@@ -245,7 +327,12 @@ document.getElementById('makeAllHealthyButton').addEventListener('click', functi
             }
         }
         drawGrid();
+    }
+});
 
+// chartResetButton
+document.getElementById('chartResetButton').addEventListener('click', function() {
+    if (!isRunning) {
         // Resetting the population chart
         populationChart.data.labels = []; // Clear the labels
         populationChart.data.datasets.forEach((dataset) => {
@@ -254,6 +341,7 @@ document.getElementById('makeAllHealthyButton').addEventListener('click', functi
         populationChart.update(); // Update the chart to reflect the changes
     }
 });
+
 
 function infectCell(event) {
     if (!isRunning) {
@@ -293,7 +381,9 @@ function createGrid(width, height) {
                 health: isSick ? 100 - getSeverityLevel() * incubationReducedSeverityMultiplier : 100,
                 sickDays: 0,
                 incubationPhaseDuration: 0,
-                healSpeed: 0
+                healSpeed: 0,
+                stayingFor: getSkewedRandomValue(120, 180, 1),
+                stayed: 0
             });
         }
         arr.push(row);
@@ -321,31 +411,36 @@ let populationChart = new Chart(chartCtx, {
             borderColor: 'green',
             data: [],
             fill: false,
+            pointRadius: 2,
         }, {
             label: 'Sick',
             backgroundColor: 'red',
             borderColor: 'red',
             data: [],
             fill: false,
+            pointRadius: 2,
         }, {
             label: 'Healed',
             backgroundColor: '#F0F055', // Light yellow
             borderColor: '#F0F055',
             data: [],
             fill: false,
+            pointRadius: 2,
         }, {
             label: 'Dead',
             backgroundColor: 'black',
             borderColor: 'black',
             data: [],
             fill: false,
+            pointRadius: 2,
         }, {
             label: 'Average Health',
             backgroundColor: 'blue',
             borderColor: 'blue',
             data: [],
             fill: false,
-            yAxisID: 'y-axis-health'
+            yAxisID: 'y-axis-health',
+            pointRadius: 2, // Decrease the point radius to make it smaller
         }]
     },
     options: {
@@ -405,6 +500,20 @@ let populationChart = new Chart(chartCtx, {
 let previousCounts = { healthy: 0, sick: 0, healed: 0, dead: 0 };
 let unchangedIterations = 0;
 
+function showToast(textInput) {
+    Toastify({
+        text: textInput,
+        duration: 3000,
+        close: true,
+        gravity: "top", // `top` or `bottom`
+        position: 'right', // `left`, `center` or `right`
+        style: {
+            background: "linear-gradient(to right, #00b09b, #96c93d)"
+        },
+        stopOnFocus: true, // Prevents dismissing of toast on hover
+    }).showToast();
+}
+
 function updateChart() {
     let healthyCount = 0, sickCount = 0, healedCount = 0, deadCount = 0;
     let totalHealth = 0, totalCells = gridWidth * gridHeight;
@@ -447,6 +556,20 @@ function updateChart() {
             toggleButton.classList.remove('stop');
             toggleButton.classList.add('start');
             toggleButton.textContent = 'Start';
+            unchangedIterations = 0
+            if(averageHealth > 90){
+                showToast("Pandemic Ended! We are still Healthy! 😊");
+            }
+            else if(averageHealth > 80){
+                showToast("Pandemic Ended! Stay Strong, Guys! 💪");
+            }
+            else if(averageHealth > 60){
+                showToast("Pandemic Ended! We will recover! 😷");
+            }
+            else{
+                showToast("Pandemic Ended! What a Deadly Pandemic! 😢");
+            }
+            
         }
     } else {
         unchangedIterations = 0; // Reset the counter if counts have changed
@@ -510,6 +633,7 @@ function updateGrid() {
     for (let y = 0; y < gridHeight; y++) {
         for (let x = 0; x < gridWidth; x++) {
             nextGrid[y][x] = {...grid[y][x]}; // Copy current state
+            nextGrid[y][x].stayed++;
 
             // If the cell is healthy, healing or healed, it can get infected
             if(nextGrid[y][x].state === STATES.HEALTHY 
@@ -595,6 +719,7 @@ function gameLoop(currentTime) {
         if (secondsSinceLastRender < 1 / simulationSpeed) return;
 
         lastRenderTime = currentTime;
+        applyTravelRestriction();
         updateGrid();
         drawGrid();
         updateChart();
@@ -634,7 +759,7 @@ document.getElementById('healingInfectionChance_ReductionMultipler').addEventLis
 });
 
 document.getElementById('simulationSpeed').addEventListener('input', function() {
-    document.getElementById('simulationSpeedValue').textContent = this.value;
+    document.getElementById('simulationSpeedValue').textContent = `${this.value} Day(s)/second`;
 });
 
 document.getElementById('incubationInfectionRateMultiplier').addEventListener('input', function() {
