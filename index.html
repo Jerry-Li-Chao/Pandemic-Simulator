@@ -7,11 +7,10 @@
 </head>
 <body>
     <div id="controls">
-        <!-- <canvas id="populationChart"></canvas> -->
-
         <button id="toggleButton" class="start">Start</button>
         <button id="randomizeButton">Randomize Initial Population (No Chart Reset)</button>
         <button id="makeAllHealthyButton">Make All Healthy (Chart Reset)</button>
+        
         <!-- make a unordered list of notices -->
         <ul>
             <li>Press down "Shift" to draw your own initial infected population</li>
@@ -19,49 +18,92 @@
             <li>It is allowed to adjust the variable when simulation is running, 
                 changes are applied in real time to the simulation</li>
         </ul>
+        <div id="setup">
+            <label for="initialSick">Initial Sick Population (if randomize) %:</label>
+            <input type="number" id="initialSick" min="0" max="100" value="5">
 
-        <label for="initialSick">Initial Sick Population (if randomize) %:</label>
-        <input type="number" id="initialSick" min="0" max="100" value="5">
+            <label for="transmissibilityMin">Transmissibility Min %:</label>
+            <input type="range" id="transmissibilityMin" min="0" max="10" step="0.1" value="2">
+            <label for="transmissibilityMax">Transmissibility Max %:</label>
+            <input type="range" id="transmissibilityMax" min="0" max="10" step="0.1" value="3">
+            <span id="transmissibilityRange">0% - 3%</span>
 
-        <label for="transmissibilityMin">Transmissibility Min %:</label>
-        <input type="range" id="transmissibilityMin" min="0" max="10" step="0.1" value="2">
-        <label for="transmissibilityMax">Transmissibility Max %:</label>
-        <input type="range" id="transmissibilityMax" min="0" max="10" step="0.1" value="3">
-        <span id="transmissibilityRange">0% - 3%</span>
+            <label for="simulationSpeed">Simulation Speed:</label>
+            <input type="range" id="simulationSpeed" min="1" max="30" value="20">
+            <span id="simulationSpeedValue">20</span>
+        </div>
 
+        <!-- div to wrap -->
+        <div id="infectionRateDiv">
+            <label for="severityLevelMin">Min Daily Health Loss Rate:</label>
+            <input type="range" id="severityLevelMin" min="0" max="100" value="2">
+            <label for="severityLevelMax">Max Daily Health Loss Rate:</label>
+            <input type="range" id="severityLevelMax" min="0" max="100" value="5">
+            <span id="severityLevelRange">2 - 5</span>
+            <label for="skewnessSlider">Skewness:</label>
+            <input type="range" id="skewnessSlider" min="0.05" max="3" step="0.05" value="1">
+            <span id="skewnessValue">1</span>
+            <br/>
+            <ul>
+                <li>greater than 1: more mild cases</li>
+                <li>smaller than 1: more severe cases</li>
+                <li>euqal to 1: uniform distribution of mild to severe cases</li>
+            </ul>
+        </div>
 
-        <label for="simulationSpeed">Simulation Speed:</label>
-        <input type="range" id="simulationSpeed" min="1" max="30" value="20">
-        <span id="simulationSpeedValue">20</span>
-
-        <label for="severityLevel">Daily Health Loss Rate:</label>
-        <input type="number" id="severityLevel" min="0" max="100" value="5">
-
-        <label for="healSpeed">Daily Health Recovery Rate When Healing:</label>
-        <input type="number" id="healSpeed" min="0" max="100" value="5">
+        <!-- div to wrap -->
+        <div id="recoveryRateDiv">
+            <label for="healSpeedMin">Min Daily Health Recovery Rate When Healing:</label>
+            <input type="range" id="healSpeedMin" min="0" max="50" value="3">
+            <label for="healSpeedMax">Max Daily Health Recovery Rate When Healing:</label>
+            <input type="range" id="healSpeedMax" min="0" max="50" value="5">
+            <span id="healSpeedRange">3 - 5</span>
+        </div>
         
-        <label for="healingInfectionChance_ReductionMultipler">( __% * infectionRate) to be re-infected when healing</label>
-        <input type="number" id="healingInfectionChance_ReductionMultipler" min="0" max="100" value="80">
+        <!-- div to wrap -->
+        <div id="loweredInfectionRate">
+            <label for="healingInfectionChance_ReductionMultipler">( __% * infectionRate) to be re-infected when healing</label>
+            <input type="number" id="healingInfectionChance_ReductionMultipler" min="0" max="100" value="80">
 
-        <label for="healedReInfectionChance_ReductionMultipler">( __% * infectionRate) to be re-infected when healed</label>
-        <input type="number" id="healedReInfectionChance_ReductionMultipler" min="0" max="100" value="25">
+            <label for="healedReInfectionChance_ReductionMultipler">( __% * infectionRate) to be re-infected when healed</label>
+            <input type="number" id="healedReInfectionChance_ReductionMultipler" min="0" max="100" value="25">     
+        </div>
+        
+        <!-- div to wrap -->
+        <div id="healChanceDiv">
+            <label for="healChanceMin">Min Symptomatic 🤒 to Healing 🏥 Probability %:</label>
+            <input type="range" id="healChanceMin" min="0" max="100" value="15">
+            <label for="healChanceMax">Max Symptomatic 🤒 to Healing 🏥 Probability %:</label>
+            <input type="range" id="healChanceMax" min="0" max="100" value="20">
+            <span id="healChanceRange">15% - 20%</span>
+            <label for="healChanceSkewness">Heal Chance Skewness:</label>
+            <input type="range" id="healChanceSkewness" min="0.05" max="3" step="0.05" value="1">
+            <span id="healChanceSkewnessValue">1</span>
+            <br/>
+            <ul>
+                <li>greater than 1: MORE less chance to heal</li>
+                <li>smaller than 1: MORE high chance to heal</li>
+                <li>euqal to 1: uniform distribution of heal chances</li>
+            </ul>
+        </div>
 
-        <label for="healChance">Symptomatic 🤒 to Healing 🏥 Probability % on any given day:</label>
-        <input type="number" id="healChance" min="0" max="100" value="20">
+        <!-- div to wrap -->
+        <div id="incubationDiv">
+            <label for="incubationInfectionRateMultiplier">Incubation Phase Infectivity Multiplier:</label>
+            <input type="range" id="incubationInfectionRateMultiplier" min="0" max="3" step="0.1" value="1.5">
+            <span id="incubationInfectionRateMultiplierValue">1.5</span>
 
-        <label for="incubationInfectionRateMultiplier">Incubation Phase Infectivity Multiplier:</label>
-        <input type="range" id="incubationInfectionRateMultiplier" min="0" max="3" step="0.1" value="1.5">
-        <span id="incubationInfectionRateMultiplierValue">1.5</span>
+            <label for="incubationReducedSeverityMultiplier">Incubation Phase Severity Reduction:</label>
+            <input type="range" id="incubationReducedSeverityMultiplier" min="0" max="1" step="0.1" value="0.1">
+            <span id="incubationReducedSeverityMultiplierValue">0.1</span>
 
-        <label for="incubationReducedSeverityMultiplier">Incubation Phase Severity Reduction:</label>
-        <input type="range" id="incubationReducedSeverityMultiplier" min="0" max="1" step="0.1" value="0.1">
-        <span id="incubationReducedSeverityMultiplierValue">0.1</span>
-
-        <label for="incubationPhaseDurationMin">Incubation Phase Min Duration (Days):</label>
-        <input type="number" id="incubationPhaseDurationMin" min="0" max="5475" value="14">
-        <label for="incubationPhaseDurationMax">Incubation Phase Max Duration (Days):</label>
-        <input type="number" id="incubationPhaseDurationMax" min="0" max="5475" value="14">
-        <span id="incubationPhaseDurationRange">14 - 14 Days</span>
+            <label for="incubationPhaseDurationMin">Incubation Phase Min Duration (Days):</label>
+            <input type="number" id="incubationPhaseDurationMin" min="0" max="5475" value="14">
+            <label for="incubationPhaseDurationMax">Incubation Phase Max Duration (Days):</label>
+            <input type="number" id="incubationPhaseDurationMax" min="0" max="5475" value="14">
+            <span id="incubationPhaseDurationRange">14 - 14 Days</span>
+        </div>
+        
 
 
 

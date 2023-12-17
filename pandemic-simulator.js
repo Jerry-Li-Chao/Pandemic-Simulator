@@ -20,10 +20,7 @@ const transmissibilityRange = document.getElementById('transmissibilityRange');
 let isRunning = false;
 let infectionRate = getTransmissibility();
 let initialSickPercentage = 0.05; // 5%
-let severityLevel = 5; // Default severity level
-let healSpeed = 5; // Default heal speed
 let healedReInfectionChance_ReductionMultipler = 0.25; // Default healed infection chance
-let healChance = 0.2; // Default heal chance
 
 let incubationInfectionRateMultiplier = 1.5;
 let incubationReducedSeverityMultiplier = 0.1;
@@ -31,20 +28,8 @@ let incubationReducedSeverityMultiplier = 0.1;
 // Default healing infection chance reduction multipler
 let healingInfectionChance_ReductionMultipler = 0.8; 
 
-document.getElementById('severityLevel').addEventListener('input', function() {
-    severityLevel = parseInt(this.value);
-});
-
-document.getElementById('healSpeed').addEventListener('input', function() {
-    healSpeed = parseInt(this.value);
-});
-
 document.getElementById('healedReInfectionChance_ReductionMultipler').addEventListener('input', (event) => {
     healedReInfectionChance_ReductionMultipler = event.target.value / 100;
-});
-
-document.getElementById('healChance').addEventListener('input', (event) => {
-    healChance = event.target.value / 100;
 });
 
 function updateTransmissibilityRange() {
@@ -69,13 +54,85 @@ function updateIncubationPhaseDurationRange() {
         incubationPhaseDurationMin.value = incubationPhaseDurationMax.value;
     }
 
-    incubationPhaseDurationRange.textContent = `${incubationPhaseDurationMin.value} - ${incubationPhaseDurationMax.value} Days (Normal Distribution)`;
+    incubationPhaseDurationRange.textContent = 
+    `${incubationPhaseDurationMin.value} - ${incubationPhaseDurationMax.value} Days (Normal Distribution)`;
 }
 
 incubationPhaseDurationMin.addEventListener('input', updateIncubationPhaseDurationRange);
 incubationPhaseDurationMax.addEventListener('input', updateIncubationPhaseDurationRange);
 
 updateIncubationPhaseDurationRange(); // Initial call to set the text
+
+
+const healSpeedMin = document.getElementById('healSpeedMin');
+const healSpeedMax = document.getElementById('healSpeedMax');
+const healSpeedRange = document.getElementById('healSpeedRange');
+
+function updateHealSpeedRange() {
+    if (parseInt(healSpeedMin.value) > parseInt(healSpeedMax.value)) {
+        healSpeedMin.value = healSpeedMax.value;
+    }
+
+    healSpeedRange.textContent = `⬆️ ${healSpeedMin.value} - ${healSpeedMax.value}🩸/Day (Normal Distribution)`;
+}
+
+healSpeedMin.addEventListener('input', updateHealSpeedRange);
+healSpeedMax.addEventListener('input', updateHealSpeedRange);
+
+updateHealSpeedRange(); // Initial call to set the text
+
+
+const severityLevelMin = document.getElementById('severityLevelMin');
+const severityLevelMax = document.getElementById('severityLevelMax');
+const severityLevelRange = document.getElementById('severityLevelRange');
+
+const skewnessSlider = document.getElementById('skewnessSlider');
+const skewnessValue = document.getElementById('skewnessValue');
+
+function updateSeverityLevelRange() {
+    if (parseInt(severityLevelMin.value) > parseInt(severityLevelMax.value)) {
+        severityLevelMin.value = severityLevelMax.value;
+    }
+
+    severityLevelRange.textContent = `${severityLevelMin.value} - ${severityLevelMax.value}`;
+}
+
+function updateSkewnessValue() {
+    skewnessValue.textContent = `${skewnessSlider.value}`;
+}
+
+severityLevelMin.addEventListener('input', updateSeverityLevelRange);
+severityLevelMax.addEventListener('input', updateSeverityLevelRange);
+skewnessSlider.addEventListener('input', updateSkewnessValue);
+
+updateSeverityLevelRange();
+updateSkewnessValue();
+
+const healChanceMin = document.getElementById('healChanceMin');
+const healChanceMax = document.getElementById('healChanceMax');
+const healChanceRange = document.getElementById('healChanceRange');
+
+const healChanceSkewness = document.getElementById('healChanceSkewness');
+const healChanceSkewnessValue = document.getElementById('healChanceSkewnessValue');
+
+function updateHealChanceRange() {
+    if (parseInt(healChanceMin.value) > parseInt(healChanceMax.value)) {
+        healChanceMin.value = healChanceMax.value;
+    }
+
+    healChanceRange.textContent = `${healChanceMin.value}% - ${healChanceMax.value}%`;
+}
+
+function updateHealChanceSkewnessValue() {
+    healChanceSkewnessValue.textContent = healChanceSkewness.value;
+}
+
+healChanceMin.addEventListener('input', updateHealChanceRange);
+healChanceMax.addEventListener('input', updateHealChanceRange);
+healChanceSkewness.addEventListener('input', updateHealChanceSkewnessValue);
+
+updateHealChanceRange();
+updateHealChanceSkewnessValue();
 
 
 function generateNormallyDistributedValue(mean, stdDev) {
@@ -85,6 +142,16 @@ function generateNormallyDistributedValue(mean, stdDev) {
     let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
     num = num * stdDev + mean; // Adjust for mean and standard deviation
     return num;
+}
+
+// When skewness is 1, the distribution is not skewed (uniform distribution).
+// When skewness is greater than 1, the distribution is skewed towards the lower end (more values near min).
+// When skewness is less than 1 but greater than 0, the distribution is skewed towards the higher end (more values near max).
+function getSkewedRandomValue(min, max, skewness) {
+    let u = Math.random();
+    // Apply a power transformation to skew the distribution
+    let skewedU = Math.pow(u, skewness);
+    return min + (skewedU * (max - min));
 }
 
 function getNormalRandomPercentage(min, max) {
@@ -110,6 +177,29 @@ function getIncubationDuration() {
     const maxDuration = parseInt(incubationPhaseDurationMax.value);
     return getNormalRandomPercentage(minDuration, maxDuration);
 }
+
+function getHealSpeed() {
+    const minHealSpeed = parseInt(healSpeedMin.value);
+    const maxHealSpeed = parseInt(healSpeedMax.value);
+    return getNormalRandomPercentage(minHealSpeed, maxHealSpeed);
+}
+
+// getSeverityLevel use skewness to skew the distribution
+function getSeverityLevel() {
+    const minSeverityLevel = parseInt(severityLevelMin.value);
+    const maxSeverityLevel = parseInt(severityLevelMax.value);
+    const skewness = parseFloat(skewnessSlider.value);
+    return getSkewedRandomValue(minSeverityLevel, maxSeverityLevel, skewness);
+}
+
+// getHealChance use skewness to skew the distribution
+function getHealChance() {
+    const minHealChance = parseInt(healChanceMin.value);
+    const maxHealChance = parseInt(healChanceMax.value);
+    const skewness = parseFloat(healChanceSkewness.value);
+    return getSkewedRandomValue(minHealChance, maxHealChance, skewness) / 100;
+}
+
 
 let mouseIsDown = false;
 let keyIsPressed = false;
@@ -173,7 +263,7 @@ function infectCell(event) {
 
         if (grid[y] && grid[y][x] && (grid[y][x].state === STATES.HEALTHY || grid[y][x].state === STATES.HEALED)) {
             grid[y][x].state = STATES.INCUBATING;
-            grid[y][x].health = 100 - severityLevel * incubationReducedSeverityMultiplier; // Set health based on severity level
+            grid[y][x].health = 100 - getSeverityLevel() * incubationReducedSeverityMultiplier; // Set health based on severity level
             drawGrid();
         }
     }
@@ -200,9 +290,10 @@ function createGrid(width, height) {
             const isSick = Math.random() < initialSickPercentage;
             row.push({
                 state: isSick ? STATES.INCUBATING : STATES.HEALTHY,
-                health: isSick ? 100 - severityLevel * incubationReducedSeverityMultiplier : 100,
-                sickDays: 0, // Track the number of days a person has been sick
-                incubationPhaseDuration: 0
+                health: isSick ? 100 - getSeverityLevel() * incubationReducedSeverityMultiplier : 100,
+                sickDays: 0,
+                incubationPhaseDuration: 0,
+                healSpeed: 0
             });
         }
         arr.push(row);
@@ -428,7 +519,6 @@ function updateGrid() {
                     nextGrid[y][x].state = STATES.INCUBATING;
                     nextGrid[y][x].sickDays = 0;
                     nextGrid[y][x].incubationPhaseDuration = getIncubationDuration();
-                    console.log(nextGrid[y][x].incubationPhaseDuration)
                 }
             }
             
@@ -437,20 +527,21 @@ function updateGrid() {
                 if (nextGrid[y][x].sickDays >= nextGrid[y][x].incubationPhaseDuration) {
                     nextGrid[y][x].state = STATES.SYMPTOMATIC;
                 } else {
-                    nextGrid[y][x].health -= severityLevel * incubationReducedSeverityMultiplier;
+                    nextGrid[y][x].health -= getSeverityLevel() * incubationReducedSeverityMultiplier;
                 }
             } else if (grid[y][x].state === STATES.SYMPTOMATIC) {
-                nextGrid[y][x].health -= severityLevel;
+                nextGrid[y][x].health -= getSeverityLevel();
                 if (nextGrid[y][x].health <= 0) {
                     nextGrid[y][x].state = STATES.DEAD;
                     nextGrid[y][x].health = 0;
                 }
                 // chance to starting healing
-                else if(Math.random() < healChance){
+                else if(Math.random() < getHealChance()){
                     nextGrid[y][x].state = STATES.HEALING;
                 }
             } else if (grid[y][x].state === STATES.HEALING) {
-                nextGrid[y][x].health += healSpeed;
+                nextGrid[y][x].healSpeed = getHealSpeed();
+                nextGrid[y][x].health += nextGrid[y][x].healSpeed;
                 if (nextGrid[y][x].health >= 100) {
                     nextGrid[y][x].state = STATES.HEALED;
                     nextGrid[y][x].health = 100;
