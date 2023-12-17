@@ -1,6 +1,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const gridWidth = 40;
+const gridWidth = 50;
 const gridHeight = 40;
 // const cellSize = 20;
 
@@ -13,18 +13,20 @@ const cellSize = parseFloat(computedStyle.width) / gridWidth;
 canvas.width = gridWidth * cellSize;
 canvas.height = gridHeight * cellSize;
 
+const transmissibilityMin = document.getElementById('transmissibilityMin');
+const transmissibilityMax = document.getElementById('transmissibilityMax');
+const transmissibilityRange = document.getElementById('transmissibilityRange');
 
 let isRunning = false;
-let infectionRate = 0.03;
+let infectionRate = getTransmissibility();
 let initialSickPercentage = 0.05; // 5%
 let severityLevel = 5; // Default severity level
 let healSpeed = 5; // Default heal speed
 let healedReInfectionChance_ReductionMultipler = 0.25; // Default healed infection chance
 let healChance = 0.2; // Default heal chance
 
-let incubationInfectionRateMultiplier = 0.5;
+let incubationInfectionRateMultiplier = 1.5;
 let incubationReducedSeverityMultiplier = 0.1;
-let incubationPhaseDuration = 14;
 
 // Default healing infection chance reduction multipler
 let healingInfectionChance_ReductionMultipler = 0.8; 
@@ -45,6 +47,69 @@ document.getElementById('healChance').addEventListener('input', (event) => {
     healChance = event.target.value / 100;
 });
 
+function updateTransmissibilityRange() {
+    if (parseFloat(transmissibilityMin.value) > parseFloat(transmissibilityMax.value)) {
+        transmissibilityMin.value = transmissibilityMax.value;
+    }
+
+    transmissibilityRange.textContent = `${transmissibilityMin.value}% - ${transmissibilityMax.value}% (Normal Distribution)`;
+}
+
+transmissibilityMin.addEventListener('input', updateTransmissibilityRange);
+transmissibilityMax.addEventListener('input', updateTransmissibilityRange);
+
+updateTransmissibilityRange(); // Initial call to set the text
+
+const incubationPhaseDurationMin = document.getElementById('incubationPhaseDurationMin');
+const incubationPhaseDurationMax = document.getElementById('incubationPhaseDurationMax');
+const incubationPhaseDurationRange = document.getElementById('incubationPhaseDurationRange');
+
+function updateIncubationPhaseDurationRange() {
+    if (parseInt(incubationPhaseDurationMin.value) > parseInt(incubationPhaseDurationMax.value)) {
+        incubationPhaseDurationMin.value = incubationPhaseDurationMax.value;
+    }
+
+    incubationPhaseDurationRange.textContent = `${incubationPhaseDurationMin.value} - ${incubationPhaseDurationMax.value} Days (Normal Distribution)`;
+}
+
+incubationPhaseDurationMin.addEventListener('input', updateIncubationPhaseDurationRange);
+incubationPhaseDurationMax.addEventListener('input', updateIncubationPhaseDurationRange);
+
+updateIncubationPhaseDurationRange(); // Initial call to set the text
+
+
+function generateNormallyDistributedValue(mean, stdDev) {
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random(); // Converting [0,1) to (0,1)
+    while (v === 0) v = Math.random();
+    let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    num = num * stdDev + mean; // Adjust for mean and standard deviation
+    return num;
+}
+
+function getNormalRandomPercentage(min, max) {
+    const mean = (min + max) / 2;
+    const stdDev = (max - min) / 6; // Approx. 99.7% values will be within [min, max]
+
+    let percentage;
+    do {
+        percentage = generateNormallyDistributedValue(mean, stdDev);
+    } while (percentage < min || percentage > max); // Ensure value is within range
+
+    return percentage;
+}
+
+function getTransmissibility() {
+    const minTransmissibility = parseFloat(transmissibilityMin.value);
+    const maxTransmissibility = parseFloat(transmissibilityMax.value);
+    return getNormalRandomPercentage(minTransmissibility, maxTransmissibility) / 100;
+}
+
+function getIncubationDuration() {
+    const minDuration = parseInt(incubationPhaseDurationMin.value);
+    const maxDuration = parseInt(incubationPhaseDurationMax.value);
+    return getNormalRandomPercentage(minDuration, maxDuration);
+}
 
 let mouseIsDown = false;
 let keyIsPressed = false;
@@ -136,7 +201,8 @@ function createGrid(width, height) {
             row.push({
                 state: isSick ? STATES.INCUBATING : STATES.HEALTHY,
                 health: isSick ? 100 - severityLevel * incubationReducedSeverityMultiplier : 100,
-                sickDays: 0 // Track the number of days a person has been sick
+                sickDays: 0, // Track the number of days a person has been sick
+                incubationPhaseDuration: 0
             });
         }
         arr.push(row);
@@ -361,12 +427,14 @@ function updateGrid() {
                 if(Math.random() < calculateInfectionChance(x, y)){
                     nextGrid[y][x].state = STATES.INCUBATING;
                     nextGrid[y][x].sickDays = 0;
+                    nextGrid[y][x].incubationPhaseDuration = getIncubationDuration();
+                    console.log(nextGrid[y][x].incubationPhaseDuration)
                 }
             }
             
             if (grid[y][x].state === STATES.INCUBATING) {
                 nextGrid[y][x].sickDays++;
-                if (nextGrid[y][x].sickDays >= incubationPhaseDuration) {
+                if (nextGrid[y][x].sickDays >= nextGrid[y][x].incubationPhaseDuration) {
                     nextGrid[y][x].state = STATES.SYMPTOMATIC;
                 } else {
                     nextGrid[y][x].health -= severityLevel * incubationReducedSeverityMultiplier;
@@ -395,26 +463,23 @@ function updateGrid() {
 }
 
 function calculateInfectionChance(x, y) {
-    let incubatingNeighbors = 0;
-    let symptomaticNeighbors = 0;
+    let notInfectedChance = 1;
 
     for (let dy = -1; dy <= 1; dy++) {
         for (let dx = -1; dx <= 1; dx++) {
             if (dx === 0 && dy === 0) continue;
             let nx = x + dx, ny = y + dy;
             if (nx >= 0 && nx < gridWidth && ny >= 0 && ny < gridHeight) {
-                if (grid[ny][nx].state === STATES.INCUBATING) {
-                    incubatingNeighbors++;
-                } else if (grid[ny][nx].state === STATES.SYMPTOMATIC) {
-                    symptomaticNeighbors++;
+                if (grid[ny][nx].state === STATES.INCUBATING || grid[ny][nx].state === STATES.SYMPTOMATIC) {
+                    let individualInfectionRate = getTransmissibility();
+                    if (grid[ny][nx].state === STATES.INCUBATING) {
+                        individualInfectionRate *= incubationInfectionRateMultiplier;
+                    }
+                    notInfectedChance *= (1 - individualInfectionRate);
                 }
             }
         }
     }
-
-    // Calculate the chance of not getting infected by each neighbor
-    let notInfectedChance = Math.pow(1 - infectionRate * incubationInfectionRateMultiplier, incubatingNeighbors) *
-                             Math.pow(1 - infectionRate, symptomaticNeighbors);
 
     // The overall infection chance is 1 minus the chance of not getting infected by any neighbor
     let infectionChance = 1 - notInfectedChance;
@@ -470,9 +535,7 @@ document.getElementById('initialSick').addEventListener('input', (event) => {
     initialSickPercentage = event.target.value / 100;
 });
 
-document.getElementById('infectionRate').addEventListener('input', (event) => {
-    infectionRate = event.target.value / 100;
-});
+
 
 // healingInfectionChance_ReductionMultipler
 document.getElementById('healingInfectionChance_ReductionMultipler').addEventListener('input', (event) => {
@@ -491,11 +554,6 @@ document.getElementById('incubationReducedSeverityMultiplier').addEventListener(
     document.getElementById('incubationReducedSeverityMultiplierValue').textContent = this.value;    
 });
 
-document.getElementById('incubationPhaseDuration').addEventListener('input', function() {
-    document.getElementById('incubationPhaseDurationValue').textContent = this.value;    
-});
-
-
 document.getElementById('incubationInfectionRateMultiplier').addEventListener('input', function() {
     incubationInfectionRateMultiplier = parseFloat(this.value);
 });
@@ -504,9 +562,6 @@ document.getElementById('incubationReducedSeverityMultiplier').addEventListener(
     incubationReducedSeverityMultiplier = parseFloat(this.value);
 });
 
-document.getElementById('incubationPhaseDuration').addEventListener('input', function() {
-    incubationPhaseDuration = parseInt(this.value);
-});
 
 
 
