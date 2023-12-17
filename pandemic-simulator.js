@@ -94,7 +94,7 @@ function updateSeverityLevelRange() {
         severityLevelMin.value = severityLevelMax.value;
     }
 
-    severityLevelRange.textContent = `${severityLevelMin.value} - ${severityLevelMax.value}`;
+    severityLevelRange.textContent = `⬇️ ${severityLevelMin.value} - ${severityLevelMax.value}🩸/Day`;
 }
 
 function updateSkewnessValue() {
@@ -653,6 +653,65 @@ document.getElementById('incubationReducedSeverityMultiplier').addEventListener(
     incubationReducedSeverityMultiplier = parseFloat(this.value);
 });
 
+// I want to modify the setPresetValues() to pass in the values, instead of hard code the values
+document.getElementById('covid19').addEventListener('click', function() {
+    setPresetValues({
+        initialSick: 1,
+        transmissibilityMin: 2,
+        transmissibilityMax: 5,
+        simulationSpeed: 20,
+        severityLevelMin: 2,
+        severityLevelMax: 5,
+        skewnessSlider: 3,
+        healSpeedMin: 2,
+        healSpeedMax: 7,
+        healingInfectionChance_ReductionMultipler: 0.15,
+        healedReInfectionChance_ReductionMultipler: 0.3,
+        healChanceMin: 10,
+        healChanceMax: 20,
+        healChanceSkewness: 0.7,
+        incubationInfectionRateMultiplier: 1.5,
+        incubationReducedSeverityMultiplier: 0.5,
+        incubationPhaseDurationMin: 2,
+        incubationPhaseDurationMax: 14
+    });
+    // click on randomizeButton to randomize the grid
+    document.getElementById('randomizeButton').click();
+});
+
+function setValueAndDispatchEvent(elementId, value) {
+    const element = document.getElementById(elementId);
+    element.value = value;
+    element.dispatchEvent(new Event('input'));
+}
+
+function setPresetValues(values) {
+    setValueAndDispatchEvent('initialSick', values.initialSick);
+    setValueAndDispatchEvent('transmissibilityMin', values.transmissibilityMin);
+    setValueAndDispatchEvent('transmissibilityMax', values.transmissibilityMax);
+    setValueAndDispatchEvent('simulationSpeed', values.simulationSpeed);
+    setValueAndDispatchEvent('severityLevelMin', values.severityLevelMin);
+    setValueAndDispatchEvent('severityLevelMax', values.severityLevelMax);
+    setValueAndDispatchEvent('skewnessSlider', values.skewnessSlider);
+    setValueAndDispatchEvent('healSpeedMin', values.healSpeedMin);
+    setValueAndDispatchEvent('healSpeedMax', values.healSpeedMax);
+    setValueAndDispatchEvent('healingInfectionChance_ReductionMultipler', values.healingInfectionChance_ReductionMultipler);
+    setValueAndDispatchEvent('healedReInfectionChance_ReductionMultipler', values.healedReInfectionChance_ReductionMultipler);
+    setValueAndDispatchEvent('healChanceMin', values.healChanceMin);
+    setValueAndDispatchEvent('healChanceMax', values.healChanceMax);
+    setValueAndDispatchEvent('healChanceSkewness', values.healChanceSkewness);
+    setValueAndDispatchEvent('incubationInfectionRateMultiplier', values.incubationInfectionRateMultiplier);
+    setValueAndDispatchEvent('incubationReducedSeverityMultiplier', values.incubationReducedSeverityMultiplier);
+    setValueAndDispatchEvent('incubationPhaseDurationMin', values.incubationPhaseDurationMin);
+    setValueAndDispatchEvent('incubationPhaseDurationMax', values.incubationPhaseDurationMax);
+
+    // Update display for any sliders or ranges
+    updateTransmissibilityRange();
+    updateSeverityLevelRange();
+    updateHealSpeedRange();
+    updateHealChanceRange();
+    updateIncubationPhaseDurationRange();
+}
 
 
 

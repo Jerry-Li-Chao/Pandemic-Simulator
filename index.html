@@ -18,6 +18,9 @@
             <li>It is allowed to adjust the variable when simulation is running, 
                 changes are applied in real time to the simulation</li>
         </ul>
+
+        <button id="covid19">COVID-19</button>
+
         <div id="setup">
             <label for="initialSick">Initial Sick Population (if randomize) %:</label>
             <input type="number" id="initialSick" min="0" max="100" value="5">
@@ -81,8 +84,8 @@
             <span id="healChanceSkewnessValue">1</span>
             <br/>
             <ul>
-                <li>greater than 1: MORE less chance to heal</li>
-                <li>smaller than 1: MORE high chance to heal</li>
+                <li>greater than 1: Less likely to heal</li>
+                <li>smaller than 1: More likely to heal</li>
                 <li>euqal to 1: uniform distribution of heal chances</li>
             </ul>
         </div>
@@ -104,11 +107,6 @@
             <span id="incubationPhaseDurationRange">14 - 14 Days</span>
         </div>
         
-
-
-
-        <!-- <canvas id="populationChart"></canvas> -->
-
     </div>
     <div id="test">
         <h1>Pandemic Simulator</h1>
