@@ -3,6 +3,15 @@ const ctx = canvas.getContext('2d');
 const gridWidth = 50;
 const gridHeight = 40;
 // const cellSize = 20;
+const STATES = {
+    HEALTHY: 'healthy',
+    INCUBATING: 'incubating', // New state for incubation phase
+    SYMPTOMATIC: 'symptomatic', // New state for symptomatic phase
+    DEAD: 'dead', 
+    HEALING: 'healing',
+    HEALED: 'healed'
+};
+
 
 // Get the computed style of the canvas
 const computedStyle = getComputedStyle(canvas);
@@ -108,6 +117,8 @@ const severityLevelRange = document.getElementById('severityLevelRange');
 
 const skewnessSlider = document.getElementById('skewnessSlider');
 const skewnessValue = document.getElementById('skewnessValue');
+
+
 
 function updateSeverityLevelRange() {
     if (parseFloat(severityLevelMin.value) > parseFloat(severityLevelMax.value)) {
@@ -484,16 +495,6 @@ function infectCell(event) {
 }
 
 
-const STATES = {
-    HEALTHY: 'healthy',
-    INCUBATING: 'incubating', // New state for incubation phase
-    SYMPTOMATIC: 'symptomatic', // New state for symptomatic phase
-    DEAD: 'dead', 
-    HEALING: 'healing',
-    HEALED: 'healed'
-};
-
-
 let grid = createGrid(gridWidth, gridHeight);
 
 function createGrid(width, height) {
@@ -508,13 +509,43 @@ function createGrid(width, height) {
                 sickDays: 0,
                 incubationPhaseDuration: 0,
                 healSpeed: 0,
-                stayingFor: getSkewedRandomValue(120, 180, 1),
+                stayingFor: getSkewedRandomValue(80, 180, 1),
                 stayed: 0
             });
         }
         arr.push(row);
     }
     return arr;
+}
+
+function createRipplingGrid(width, height) {
+    let centerX = Math.floor(width / 2);
+    let centerY = Math.floor(height / 2);
+    let maxDistance = Math.ceil(Math.sqrt(Math.pow(Math.max(centerX, width - centerX), 2) + Math.pow(Math.max(centerY, height - centerY), 2)));
+
+    // Apply rippling effect to turn cells healthy with a delay
+    for (let d = 0; d <= maxDistance; d++) {
+        setTimeout(function() {
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    let distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+                    if(Math.floor(distance) === d){
+                        const isSick = Math.random() < initialSickPercentage;
+                        grid[y][x] = {
+                            state: isSick ? STATES.INCUBATING : STATES.HEALTHY,
+                            health: isSick ? 100 - getSeverityLevel() * incubationReducedSeverityMultiplier : 100,
+                            sickDays: 0,
+                            incubationPhaseDuration: 0,
+                            healSpeed: 0,
+                            stayingFor: getSkewedRandomValue(80, 180, 1),
+                            stayed: 0
+                        };
+                    }
+                }
+            }
+            drawGrid(); // Redraw the grid after each update
+        }, d * 75); // Delay of 75ms between each ring
+    }
 }
 
 
@@ -885,8 +916,9 @@ document.getElementById('toggleButton').addEventListener('click', () => {
 });
 
 document.getElementById('randomizeButton').addEventListener('click', () => {
-    grid = createGrid(gridWidth, gridHeight);
-    drawGrid();
+    // grid = createGrid(gridWidth, gridHeight);
+    // drawGrid();
+    createRipplingGrid(gridWidth, gridHeight);
 });
 
 document.getElementById('initialSick').addEventListener('input', (event) => {
