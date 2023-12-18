@@ -12,6 +12,9 @@ const STATES = {
     HEALED: 'healed'
 };
 
+let daysWithoutRemoval = 0;
+let bodyCountval = 0;
+let removalDaysval = 10;
 
 // Get the computed style of the canvas
 const computedStyle = getComputedStyle(canvas);
@@ -894,6 +897,18 @@ function gameLoop(currentTime) {
         lastRenderTime = currentTime;
         applyTravelRestriction();
         updateGrid();
+        // return 0, if daysWithoutRemoval < days, it's not yet time to remove the body. 
+        // return 0, if there is no dead body to remove. New bodies will be removed asap, without needing to wait days to remove
+        // return 1 if some bodies are removed and drawGrid() is called
+        if(bodyCountval != 0){
+            let result = updateGridBasedOnRemovalRate(daysWithoutRemoval);
+            if(result === 1){
+                daysWithoutRemoval = 0;
+            }
+            else if(result === 0){
+                daysWithoutRemoval++;
+            }
+        }
         drawGrid();
         updateChart();
     }
@@ -951,6 +966,64 @@ document.getElementById('incubationInfectionRateMultiplier').addEventListener('i
 document.getElementById('incubationReducedSeverityMultiplier').addEventListener('input', function() {
     incubationReducedSeverityMultiplier = parseFloat(this.value);
 });
+
+const bodyCountSlider = document.getElementById('bodyCount');
+const bodyCountValue = document.getElementById('bodyCountValue');
+const removalDaysSlider = document.getElementById('removalDays');
+const removalDaysValue = document.getElementById('removalDaysValue');
+
+function updateSliderValues() {
+    bodyCountValue.textContent = bodyCountSlider.value;
+    bodyCountval = parseInt(bodyCountSlider.value, 10);
+    removalDaysValue.textContent = removalDaysSlider.value;
+}
+
+// return 0, if daysWithoutRemoval < days, it's not yet time to remove the body. 
+// return 0, if there is no dead body to remove. New bodies will be removed asap, without needing to wait days to remove
+// return 1 if some bodies are removed and drawGrid() is called
+function updateGridBasedOnRemovalRate(daysWithoutRemoval) {
+    const bodies = parseInt(bodyCountSlider.value, 10);
+    const days = parseInt(removalDaysSlider.value, 10);
+
+    let dead_list = [];
+    // Logic to update the grid based on the removal rate
+    for (let y = 0; y < gridHeight; y++) {
+        for (let x = 0; x < gridWidth; x++) {
+                if (grid[y][x].state === STATES.DEAD) {
+                    // push an object of {y, x, grid[y][x]} to dead_list
+                    dead_list.push({y, x});
+                }
+        }
+    }
+
+    // choose randomly from dead_list to change cell state to getNewCellState()
+    if(dead_list.length != 0) {
+        for (let i = 0; i < bodies; i++) {
+            let randomIndex = Math.floor(Math.random() * dead_list.length);
+            let newY = dead_list[randomIndex].y;
+            let newX = dead_list[randomIndex].x;
+            if(daysWithoutRemoval >= days){
+                grid[newY][newX] = getNewCellState();
+            }
+            else{
+                return 0;
+            }
+        }
+    }
+    else {
+        return 0;
+    }
+    
+    drawGrid(); // Redraw the grid to reflect the changes
+    return 1;
+}
+
+bodyCountSlider.addEventListener('input', updateSliderValues);
+removalDaysSlider.addEventListener('input', updateSliderValues);
+
+// Initial call to set the values and update the grid
+updateSliderValues();
+
 
 // I want to modify the setPresetValues() to pass in the values, instead of hard code the values
 document.getElementById('covid19').addEventListener('click', function() {

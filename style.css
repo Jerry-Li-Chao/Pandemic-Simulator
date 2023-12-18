@@ -113,6 +113,27 @@ ul {
     display: none; /* Initially hide the list */
 }
 
+
+.bullet-list li:before {
+    content: "\2022"; /* Use a bullet point character */
+    color: #000000; /* Customize the bullet point color */
+    font-size: 15px;
+    margin-right: 10px;
+}
+
+.bullet-list li {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 5px 10px 5px 5px;
+    padding: 5px 10px 5px 10px;
+    width: fit-content;
+    background-color: rgba(250, 160, 255, 0.1);
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+}
+
 .collapsible-list li {
     font-size: 14px;
     line-height: 1.5;
