@@ -433,16 +433,29 @@ canvas.addEventListener('touchend', function(event) {
     }
 }, { passive: false });
 
-
+// added a cool rippling effect
 document.getElementById('makeAllHealthyButton').addEventListener('click', function() {
-    for (let y = 0; y < gridHeight; y++) {
-        for (let x = 0; x < gridWidth; x++) {
-            grid[y][x].state = STATES.HEALTHY;
-            grid[y][x].health = 100;
-        }
+    let centerX = Math.floor(gridWidth / 2);
+    let centerY = Math.floor(gridHeight / 2);
+    let maxDistance = Math.ceil(Math.sqrt(Math.pow(Math.max(centerX, gridWidth - centerX), 2) + Math.pow(Math.max(centerY, gridHeight - centerY), 2)));
+
+    for (let d = 0; d <= maxDistance; d++) {
+        setTimeout(function() {
+            for (let y = 0; y < gridHeight; y++) {
+                for (let x = 0; x < gridWidth; x++) {
+                    let distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+                    if (Math.floor(distance) === d) {
+                        grid[y][x].state = STATES.HEALTHY;
+                        grid[y][x].health = 100;
+                    }
+                }
+            }
+            drawGrid();
+        }, d * 75); // Delay of 75ms between each ring
     }
-    drawGrid();
 });
+
+
 
 // chartResetButton
 document.getElementById('chartResetButton').addEventListener('click', function() {
