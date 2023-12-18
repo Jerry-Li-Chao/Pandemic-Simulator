@@ -39,12 +39,10 @@ function updateHealedColor() {
         healedBox.classList.remove('healed-box-yellow');
         healedColorIsYellow = false;
     }
+    drawGrid();
 }
 
 toggleHealedColor.addEventListener('change', updateHealedColor);
-
-// Initial call to set the correct color based on the default checkbox state
-updateHealedColor();
 
 
 // Default healing infection chance reduction multipler
@@ -1102,3 +1100,6 @@ function setPresetValues(values) {
 
 
 drawGrid();
+
+// Initial call to set the correct color based on the default checkbox state
+updateHealedColor();
