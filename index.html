@@ -40,11 +40,14 @@
             
             <div id="presets">
                 <h3>Load Presets:</h3>
-                <button id="covid19">COVID-19</button>
-                <button id="flu">Flu</button>
-                <button id="ebola">Ebola</button>
-                <button id="hiv">HIV</button>
-                <button id="hiv-with-PrEP">HIV with PrEP</button>
+                <div id="presetsWrapper">
+                    <button id="covid19">COVID-19</button>
+                    <button id="flu">Flu</button>
+                    <button id="ebola">Ebola</button>
+                    <button id="hiv">HIV</button>
+                    <button id="hiv-with-PrEP">HIV with PrEP</button>
+                    <button id="tuberculosis">Tuberculosis</button>
+                </div>
             </div>
             
             <div id="setup">
@@ -71,20 +74,20 @@
     
             <!-- div to wrap -->
             <div id="infectionRateDiv">
-                <label for="severityLevelMin">Min Daily Health Loss Rate:</label>
+                <label for="severityLevelMin">Health Loss (Mild Case):</label>
                 <input type="range" id="severityLevelMin" min="0" max="100" step="0.01" value="4">
-                <label for="severityLevelMax">Max Daily Health Loss Rate:</label>
+                <label for="severityLevelMax">Health Loss (Severe Case):</label>
                 <input type="range" id="severityLevelMax" min="0" max="100" step="0.01" value="6">
                 <span id="severityLevelRange">4 - 6</span>
-                <label for="skewnessSlider">Skewness:</label>
-                <input type="range" id="skewnessSlider" min="0.05" max="3" step="0.05" value="1">
+                <label for="skewnessSlider">Case Distribution:</label>
+                <input type="range" id="skewnessSlider" min="0.02" max="2.2" step="0.02" value="1">
                 <span id="skewnessValue">1</span>
-                <br/>
+                <!-- <br/>
                 <ul>
                     <li>greater than 1: more mild cases</li>
                     <li>smaller than 1: more severe cases</li>
                     <li>euqal to 1: uniform distribution of mild to severe cases</li>
-                </ul>
+                </ul> -->
             </div>
     
             <!-- div to wrap -->
@@ -107,20 +110,20 @@
             
             <!-- div to wrap -->
             <div id="healChanceDiv">
-                <label for="healChanceMin">Min Symptomatic 🤒 to Healing 🏥 Probability %:</label>
+                <label for="healChanceMin">Min % of Transition from Symptomatic 🤒 to Healing 🏥 Stage:</label>
                 <input type="range" id="healChanceMin" min="0" max="100" value="15">
-                <label for="healChanceMax">Max Symptomatic 🤒 to Healing 🏥 Probability %:</label>
+                <label for="healChanceMax">Max % of Transition from Symptomatic 🤒 to Healing 🏥 Stage:</label>
                 <input type="range" id="healChanceMax" min="0" max="100" value="20">
                 <span id="healChanceRange">15% - 20%</span>
                 <label for="healChanceSkewness">Heal Chance Skewness:</label>
-                <input type="range" id="healChanceSkewness" min="0.05" max="3" step="0.05" value="1">
+                <input type="range" id="healChanceSkewness" min="0.02" max="2.2" step="0.02" value="1">
                 <span id="healChanceSkewnessValue">1</span>
-                <br/>
+                <!-- <br/>
                 <ul>
                     <li>greater than 1: Less likely to heal</li>
                     <li>smaller than 1: More likely to heal</li>
                     <li>euqal to 1: uniform distribution of heal chances</li>
-                </ul>
+                </ul> -->
             </div>
     
             <!-- div to wrap -->
@@ -134,10 +137,11 @@
                 <span id="incubationReducedSeverityMultiplierValue">0.1</span>
     
                 <label for="incubationPhaseDurationMin">Incubation Phase Min Duration (Days):</label>
-                <input type="number" id="incubationPhaseDurationMin" min="0" max="5475" value="14">
+                <input type="number" id="incubationPhaseDurationMin" min="0" max="5475" value="9">
                 <label for="incubationPhaseDurationMax">Incubation Phase Max Duration (Days):</label>
                 <input type="number" id="incubationPhaseDurationMax" min="0" max="5475" value="14">
-                <span id="incubationPhaseDurationRange">14 - 14 Days</span>
+                <br/>
+                <span id="incubationPhaseDurationRange">9 - 14 Days</span>
             </div>
             
         </div>

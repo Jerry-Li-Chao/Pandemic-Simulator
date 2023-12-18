@@ -19,6 +19,14 @@ body {
     z-index: 100;
 }
 
+h3 {
+    margin: 3px 0;
+}
+
+ul {
+    margin: 0;
+}
+
 #languageToggle {
     background-color: #007bff;
     color: white;
@@ -94,7 +102,7 @@ body {
 }
 
 .shake {
-    animation: shake 1.5s ease;
+    animation: shake 1s ease;
 }
 
 @keyframes shake {
@@ -188,6 +196,19 @@ body {
     flex-direction: column;
 }
 
+#presetsWrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-basis: 45%;
+}
+
+/* #controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+} */
+
 #test {
     background-color: #fff;
     padding: 20px 10px;
@@ -210,15 +231,17 @@ body {
     #controls {
         width: 90%;
         margin: 0;
+        display: flex;
+        flex-direction: column;
     }
 
     #test {
         width: 90%;
         margin: 0;
+        display: flex;
+        flex-direction: column;
     }
 }
-
-
 
 h1 {
     text-align: center;
@@ -234,20 +257,14 @@ h1 {
     width: 100%;
 }
 
-#controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-}
-
 #controls button {
-    margin: 10px 0;
-    padding: 10px 20px;
+    margin: 5px 2px;
+    padding: 10px 10px;
 }
 
 #controls label {
     display: block;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 #controls input {

@@ -94,11 +94,43 @@ function updateSeverityLevelRange() {
         severityLevelMin.value = severityLevelMax.value;
     }
 
-    severityLevelRange.textContent = `⬇️ ${severityLevelMin.value} - ${severityLevelMax.value}🩸/Day`;
+    severityLevelRange.textContent = `⬇ ${severityLevelMin.value} - ${severityLevelMax.value}🩸/Day`;
 }
 
 function updateSkewnessValue() {
-    skewnessValue.textContent = `${skewnessSlider.value}`;
+    // when skewness is 1, show text "Mild ≈ Severe Cases"
+    // when skewness is greater than 1, show text "More Mild Cases"
+    // when skewness is greater than 1.5, show text "Much More Mild Cases"
+    // when skewness is greater than 2, show text "Mostly Mild Cases"
+    // when skewness is less than 1 but greater than 0.5, show text "More Severe Cases"
+    // when skewness is less than 0.5, but greater than 0.1, show text "Much More Severe Cases"
+    // when skewness is less than 0.1, but greater than 0. show text "Mostly Severe Cases"
+    if (skewnessSlider.value == 1) {
+        skewnessValue.textContent = "Mild ≈ Severe Cases";
+    }
+    else if (skewnessSlider.value > 1) {
+        if (skewnessSlider.value > 2) {
+            skewnessValue.textContent = "Mostly Mild Cases";
+        }
+        else if (skewnessSlider.value > 1.5) {
+            skewnessValue.textContent = "Much More Mild Cases";
+        }
+        else {
+            skewnessValue.textContent = "More Mild Cases";
+        }
+    }
+    else {
+        if (skewnessSlider.value < 0.1) {
+            skewnessValue.textContent = "Mostly Severe Cases";
+        }
+        else if (skewnessSlider.value < 0.5) {
+            skewnessValue.textContent = "Much More Severe Cases";
+        }
+        else {
+            skewnessValue.textContent = "More Severe Cases";
+        }
+    }
+
 }
 
 severityLevelMin.addEventListener('input', updateSeverityLevelRange);
@@ -116,15 +148,40 @@ const healChanceSkewness = document.getElementById('healChanceSkewness');
 const healChanceSkewnessValue = document.getElementById('healChanceSkewnessValue');
 
 function updateHealChanceRange() {
-    if (parseInt(healChanceMin.value) > parseInt(healChanceMax.value)) {
+    if (parseFloat(healChanceMin.value) > parseFloat(healChanceMax.value)) {
         healChanceMin.value = healChanceMax.value;
     }
 
     healChanceRange.textContent = `${healChanceMin.value}% - ${healChanceMax.value}%`;
+    updateHealChanceSkewnessValue();
 }
 
 function updateHealChanceSkewnessValue() {
-    healChanceSkewnessValue.textContent = healChanceSkewness.value;
+    if (healChanceSkewness.value == 1) {
+        healChanceSkewnessValue.textContent = `Uniform Distribution of ${healChanceMin.value}% - ${healChanceMax.value}% Heal Chance`;
+    }
+    else if (healChanceSkewness.value > 1) {
+        if (healChanceSkewness.value > 2) {
+            healChanceSkewnessValue.textContent = `Mostly Heal with ${healChanceMin.value}% Chance`;
+        }
+        else if (healChanceSkewness.value > 1.5) {
+            healChanceSkewnessValue.textContent = `Much More Heal with ${healChanceMin.value}% Chance`;
+        }
+        else {
+            healChanceSkewnessValue.textContent = `More Heal with ${healChanceMin.value}% Chance`;
+        }
+    }
+    else {
+        if (healChanceSkewness.value < 0.1) {
+            healChanceSkewnessValue.textContent = `Mostly Heal with ${healChanceMax.value}% Chance`;
+        }
+        else if (healChanceSkewness.value < 0.5) {
+            healChanceSkewnessValue.textContent = `Much More Heal with ${healChanceMax.value}% Chance`;
+        }
+        else {
+            healChanceSkewnessValue.textContent = `More Heal with ${healChanceMax.value}% Chance`;
+        }
+    }
 }
 
 healChanceMin.addEventListener('input', updateHealChanceRange);
@@ -319,27 +376,24 @@ canvas.addEventListener('mouseup', function(event) {
 });
 
 document.getElementById('makeAllHealthyButton').addEventListener('click', function() {
-    if (!isRunning) {
-        for (let y = 0; y < gridHeight; y++) {
-            for (let x = 0; x < gridWidth; x++) {
-                grid[y][x].state = STATES.HEALTHY;
-                grid[y][x].health = 100;
-            }
+    for (let y = 0; y < gridHeight; y++) {
+        for (let x = 0; x < gridWidth; x++) {
+            grid[y][x].state = STATES.HEALTHY;
+            grid[y][x].health = 100;
         }
-        drawGrid();
     }
+    drawGrid();
 });
 
 // chartResetButton
 document.getElementById('chartResetButton').addEventListener('click', function() {
-    if (!isRunning) {
-        // Resetting the population chart
-        populationChart.data.labels = []; // Clear the labels
-        populationChart.data.datasets.forEach((dataset) => {
-            dataset.data = []; // Clear each dataset
-        });
-        populationChart.update(); // Update the chart to reflect the changes
-    }
+    // Resetting the population chart
+    populationChart.data.labels = []; // Clear the labels
+    populationChart.data.datasets.forEach((dataset) => {
+        dataset.data = []; // Clear each dataset
+    });
+    populationChart.update(); // Update the chart to reflect the changes
+
 });
 
 
@@ -889,11 +943,11 @@ document.getElementById('flu').addEventListener('click', function() {
         transmissibilityMin: 3,
         transmissibilityMax: 10,
         simulationSpeed: 10,
-        severityLevelMin: 1,
-        severityLevelMax: 3,
+        severityLevelMin: 2,
+        severityLevelMax: 6,
         skewnessSlider: 3,
-        healSpeedMin: 10,
-        healSpeedMax: 15,
+        healSpeedMin: 7,
+        healSpeedMax: 10,
         healingInfectionChance_ReductionMultipler: 0.5,
         healedReInfectionChance_ReductionMultipler: 0.1,
         healChanceMin: 15,
@@ -908,6 +962,34 @@ document.getElementById('flu').addEventListener('click', function() {
     document.getElementById('randomizeButton').click();
     showToast("Flu Preset Loaded! 😷");
 });
+
+document.getElementById('tuberculosis').addEventListener('click', function() {
+    setPresetValues({
+        initialSick: 1,
+        transmissibilityMin: 1.5,
+        transmissibilityMax: 4,
+        simulationSpeed: 15,
+        severityLevelMin: 3,
+        severityLevelMax: 6,
+        skewnessSlider: 2,
+        healSpeedMin: 3,
+        healSpeedMax: 6,
+        healingInfectionChance_ReductionMultipler: 0.4,
+        healedReInfectionChance_ReductionMultipler: 0.2,
+        healChanceMin: 15,
+        healChanceMax: 20,
+        healChanceSkewness: 0.6,
+        incubationInfectionRateMultiplier: 1.2,
+        incubationReducedSeverityMultiplier: 0.05,
+        incubationPhaseDurationMin: 21,
+        incubationPhaseDurationMax: 56
+    });
+    
+    // click on randomizeButton to randomize the grid
+    document.getElementById('randomizeButton').click();
+    showToast("Tuberculosis Preset Loaded! 😷");
+});
+
 
 function setValueAndDispatchEvent(elementId, value) {
     const element = document.getElementById(elementId);
