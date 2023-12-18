@@ -14,19 +14,25 @@
     <div id="controlsAndCharts">
         <div id="test">
             <h1>Pandemic Simulator</h1>
+            <div class="map-legend">
+                <div class="healthy-box"></div>
+                <span>Health Level </span>
+                <div class="health-box"></div>
+                <span>Healed </span>
+                <div class="healed-box"></div>
+                <span>Dead </span>
+                <div class="dead-box"></div>
+            </div>
+            
             <canvas id="gameCanvas"></canvas>
             <canvas id="populationChart"></canvas>
             <!-- make a unordered list of notices -->
             <button class="collapsible shake">Show Guide</button>
             <ul class="collapsible-list">
-                <li data-translate="Hold down 'Shift' to draw your own initial infected population">Hold down 'Shift' to draw your own initial infected population</li>
-                <li data-translate="Gradient of Green to Red: indicates the level of healthiness of that person">Gradient of Green to Red: indicates the level of healthiness of that person</li>
-                <li data-translate="It is allowed to adjust the variable when simulation is running, changes are applied in real time to the simulation">It is allowed to adjust the variable when simulation is running, 
-                    changes are applied in real time to the simulation</li>
+                <li>Start by playing the presets!</li>
+                <li data-translate="">Draw your own infected population: Hold 'shift' and drag on laptop. Use touch on mobile.</li>
+                <li data-translate="">You can adjust the variable when simulation is running.</li>
                 <li>If the graph looks weird, try stopping the simulation</li>
-                <li>Traveling Restriction is always in effect in the first 80 days of any simulation, 
-                    because it is designed to not have infected population to be removed too early 
-                    in the simulation (i.e. unchecking the box before Day 80 has no effect)</li>
                 <li>Lifting Travel Restriction usually leads to never-ending simulations</li>
             </ul>
 
@@ -44,9 +50,9 @@
                     <button id="covid19">COVID-19</button>
                     <button id="flu">Flu</button>
                     <button id="ebola">Ebola</button>
+                    <button id="tuberculosis">Tuberculosis</button>
                     <button id="hiv">HIV</button>
                     <button id="hiv-with-PrEP">HIV with PrEP</button>
-                    <button id="tuberculosis">Tuberculosis</button>
                 </div>
             </div>
             

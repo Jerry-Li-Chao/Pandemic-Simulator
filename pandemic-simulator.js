@@ -447,6 +447,8 @@ function createGrid(width, height) {
 
 
 let brightness = 0.7; // Default brightness
+// when health is 100, rgb(0, 255, 85) = green
+// when health is 0, rgb(255, 0, 0) = bright red
 function getHealthColor(health) {
     const red = Math.floor((100 - health) * 2.55) * brightness;
     const green = Math.floor(health * 2.55) * brightness;
@@ -647,11 +649,11 @@ function drawGrid() {
             ctx.rect(x * cellSize, y * cellSize, cellSize, cellSize);
             switch (grid[y][x].state) {
                 case STATES.HEALTHY:
-                    // bluish-green
+                    // green
                     ctx.fillStyle = `rgb(0, 255, 85)`;
                     break;
                 case STATES.INCUBATING:
-                    // ctx.fillStyle = `rgb(255, 173, 219)`; // pink
+                    // ctx.fillStyle = `rgba(173, 216, 230, 0.7)`;
                     ctx.fillStyle = getHealthColor(grid[y][x].health);
                     break;
                 case STATES.SYMPTOMATIC:
