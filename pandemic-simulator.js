@@ -397,6 +397,45 @@ canvas.addEventListener('mouseup', function(event) {
     mouseIsDown = false;
 });
 
+// Function to create a mock event object for touch events
+function createMockEvent(touch, canvas) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    };
+}
+
+// Event listener for touchstart
+canvas.addEventListener('touchstart', function(event) {
+    if (event.cancelable) {
+        event.preventDefault();
+    }
+    if (event.touches.length > 0) {
+        const mockEvent = createMockEvent(event.touches[0], canvas);
+        infectCell(mockEvent);
+    }
+}, { passive: false });
+
+// Event listener for touchmove
+canvas.addEventListener('touchmove', function(event) {
+    if (event.cancelable) {
+        event.preventDefault();
+    }
+    if (event.touches.length > 0) {
+        const mockEvent = createMockEvent(event.touches[0], canvas);
+        infectCell(mockEvent);
+    }
+}, { passive: false });
+
+// Event listener for touchend
+canvas.addEventListener('touchend', function(event) {
+    if (event.cancelable) {
+        event.preventDefault();
+    }
+}, { passive: false });
+
+
 document.getElementById('makeAllHealthyButton').addEventListener('click', function() {
     for (let y = 0; y < gridHeight; y++) {
         for (let x = 0; x < gridWidth; x++) {
@@ -498,7 +537,7 @@ let populationChart = new Chart(chartCtx, {
             fill: false,
             pointRadius: 2,
         }, {
-            label: 'Healed',
+            label: 'Recovered',
             backgroundColor: '#F0F055', // Light yellow
             borderColor: '#F0F055',
             data: [],
