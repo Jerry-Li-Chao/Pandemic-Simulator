@@ -25,6 +25,28 @@ let healedReInfectionChance_ReductionMultipler = 0.25; // Default healed infecti
 let incubationInfectionRateMultiplier = 1.5;
 let incubationReducedSeverityMultiplier = 0.1;
 
+let healedColorIsYellow = document.getElementById('toggleHealedColor').checked;
+const toggleHealedColor = document.getElementById('toggleHealedColor');
+const healedBox = document.querySelector('.healed-box');
+
+function updateHealedColor() {
+    if (toggleHealedColor.checked) {
+        healedBox.classList.add('healed-box-yellow');
+        healedBox.classList.remove('healed-box-green');
+        healedColorIsYellow = true
+    } else {
+        healedBox.classList.add('healed-box-green');
+        healedBox.classList.remove('healed-box-yellow');
+        healedColorIsYellow = false;
+    }
+}
+
+toggleHealedColor.addEventListener('change', updateHealedColor);
+
+// Initial call to set the correct color based on the default checkbox state
+updateHealedColor();
+
+
 // Default healing infection chance reduction multipler
 let healingInfectionChance_ReductionMultipler = 0.8; 
 
@@ -590,6 +612,7 @@ function updateChart() {
                     break;
                 case STATES.HEALED:
                     healedCount++;
+                    healthyCount++;
                     break;
                 case STATES.DEAD:
                     deadCount++;
@@ -663,8 +686,18 @@ function drawGrid() {
                     ctx.fillStyle = getHealthColor(grid[y][x].health);
                     break;
                 case STATES.HEALED:
-                    // yellow
-                    ctx.fillStyle = `rgb(240, 240, 85)`;
+                    if(healedColorIsYellow) {
+                        // yellow
+                        ctx.fillStyle = `rgb(240, 240, 85)`;
+                    }
+                    else {
+                        if(grid[y][x].health == 100){
+                            ctx.fillStyle = `rgb(0, 255, 85)`;
+                        }
+                        else{
+                            ctx.fillStyle = getHealthColor(grid[y][x].health);
+                        }
+                    }
                     break;
                 case STATES.DEAD:
                     ctx.fillStyle = 'black';
@@ -840,7 +873,7 @@ document.getElementById('covid19').addEventListener('click', function() {
         initialSick: 2,
         transmissibilityMin: 2,
         transmissibilityMax: 5,
-        simulationSpeed: 20,
+        simulationSpeed: 10,
         severityLevelMin: 3,
         severityLevelMax: 6,
         skewnessSlider: 3,
@@ -866,7 +899,7 @@ document.getElementById('ebola').addEventListener('click', function() {
         initialSick: 1,
         transmissibilityMin: 1.3,
         transmissibilityMax: 2.7,
-        simulationSpeed: 20,
+        simulationSpeed: 15,
         severityLevelMin: 5,
         severityLevelMax: 7,
         skewnessSlider: 0.5,

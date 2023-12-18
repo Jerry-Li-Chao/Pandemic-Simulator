@@ -23,7 +23,11 @@
                 <span>Dead </span>
                 <div class="dead-box"></div>
             </div>
-            
+            <div id="toggleHealedColorDiv">
+                <label for="toggleHealedColor">Healed Color is yellow</label>
+                <input type="checkbox" id="toggleHealedColor" checked>
+            </div>
+
             <canvas id="gameCanvas"></canvas>
             <canvas id="populationChart"></canvas>
             <!-- make a unordered list of notices -->
@@ -58,8 +62,8 @@
             
             <div id="setup">
                 <label for="simulationSpeed">Simulation Speed:</label>
-                <input type="range" id="simulationSpeed" min="1" max="40" value="20">
-                <span id="simulationSpeedValue">20 Day(s)/second</span>
+                <input type="range" id="simulationSpeed" min="1" max="40" value="10">
+                <span id="simulationSpeedValue">10 Day(s)/second</span>
     
                 <label for="travelRestriction">Travel Restriction In Effect:</label>
                 <input type="checkbox" id="travelRestriction" checked>

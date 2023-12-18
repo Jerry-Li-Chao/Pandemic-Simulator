@@ -42,8 +42,23 @@ body {
     width: 10px;
     height: 10px;
     background: yellow;
-
 }
+
+.healed-box {
+    width: 10px;
+    height: 10px;
+    background: yellow; /* Default color */
+}
+
+/* Additional CSS classes for color toggling */
+.healed-box-yellow {
+    background: yellow;
+}
+
+.healed-box-green {
+    background: rgb(0, 255, 85);
+}
+
 
 .dead-box {
     width: 10px;
@@ -237,11 +252,9 @@ ul {
     flex-basis: 45%;
 }
 
-/* #controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-} */
+#toggleHealedColorDiv {
+    margin: 5px;
+}
 
 #test {
     background-color: #fff;
