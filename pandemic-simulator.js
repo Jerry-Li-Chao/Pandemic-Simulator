@@ -632,7 +632,7 @@ let prevTotalHealth = 0;
 let unchangedIterations = 0;
 
 function updateChart() {
-    let healthyCount = 0, sickCount = 0, healedCount = 0, deadCount = 0;
+    let healthyCount = 0, sickCount = 0, healedCount = 0, deadCount = 0, healingCount = 0;
     let totalHealth = 0, totalCells = gridWidth * gridHeight;
 
     for (let y = 0; y < gridHeight; y++) {
@@ -650,6 +650,9 @@ function updateChart() {
                 case STATES.HEALED:
                     healedCount++;
                     healthyCount++;
+                    break;
+                case STATES.HEALING:
+                    healingCount++;
                     break;
                 case STATES.DEAD:
                     deadCount++;
@@ -692,7 +695,7 @@ function updateChart() {
     let currentTimeStep = populationChart.data.labels.length + 1;
     populationChart.data.labels.push(currentTimeStep);
     populationChart.data.datasets[0].data.push(healthyCount);
-    populationChart.data.datasets[1].data.push(sickCount);
+    populationChart.data.datasets[1].data.push(sickCount + healingCount);
     populationChart.data.datasets[2].data.push(healedCount);
     populationChart.data.datasets[3].data.push(deadCount);
     populationChart.data.datasets[4].data.push(averageHealth);
