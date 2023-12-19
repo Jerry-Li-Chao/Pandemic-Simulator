@@ -383,17 +383,13 @@ var output = document.getElementById("wallThicknessValue");
 let mouseIsDown = false;
 let PaintInfected = slider.value == '0';
 
-
-// Display the default slider value
-output.innerHTML = slider.value;
-
 let drawWallIsPressed = slider.value !== '0';
 let drawWallThickness = slider.value;
-output.innerHTML = slider.value; // Display the default slider value
+output.innerHTML = (slider.value === '0') ? `Painting Inital Sick Population` : `Painting Barrier at thickness of ${slider.value}`;
 
 // Update the value in the span element whenever the slider value changes
 slider.oninput = function() {
-    output.innerHTML = this.value;
+    output.innerHTML = (this.value === '0') ? `Painting Inital Sick Population` : `Painting Barrier at thickness of ${this.value}`;
     drawWallIsPressed = this.value !== '0';
     PaintInfected = this.value == '0';
     drawWallThickness = this.value;
@@ -483,10 +479,12 @@ document.getElementById('makeAllHealthyButton').addEventListener('click', functi
         setTimeout(function() {
             for (let y = 0; y < gridHeight; y++) {
                 for (let x = 0; x < gridWidth; x++) {
-                    let distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
-                    if (Math.floor(distance) === d) {
-                        grid[y][x].state = STATES.HEALTHY;
-                        grid[y][x].health = 100;
+                    if(grid[y][x].state !== STATES.WALL) {
+                        let distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+                        if (Math.floor(distance) === d) {
+                            grid[y][x].state = STATES.HEALTHY;
+                            grid[y][x].health = 100;
+                        }
                     }
                 }
             }
@@ -495,7 +493,18 @@ document.getElementById('makeAllHealthyButton').addEventListener('click', functi
     }
 });
 
-
+// click on clearBarriers
+document.getElementById('clearBarriers').addEventListener('click', function() {
+    for (let y = 0; y < gridHeight; y++) {
+        for (let x = 0; x < gridWidth; x++) {
+            if(grid[y][x].state === STATES.WALL) {
+                grid[y][x].state = STATES.HEALTHY;
+                grid[y][x].health = 100;
+            }
+        }
+    }
+    drawGrid();
+});
 
 // chartResetButton
 document.getElementById('chartResetButton').addEventListener('click', function() {
@@ -505,7 +514,8 @@ document.getElementById('chartResetButton').addEventListener('click', function()
         dataset.data = []; // Clear each dataset
     });
     populationChart.update(); // Update the chart to reflect the changes
-
+    days = 0;
+    toastInstance.hideToast();
 });
 
 
@@ -583,16 +593,18 @@ function createRipplingGrid(width, height) {
                 for (let x = 0; x < width; x++) {
                     let distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
                     if(Math.floor(distance) === d){
-                        const isSick = Math.random() < initialSickPercentage;
-                        grid[y][x] = {
-                            state: isSick ? STATES.INCUBATING : STATES.HEALTHY,
-                            health: isSick ? 100 - getSeverityLevel() * incubationReducedSeverityMultiplier : 100,
-                            sickDays: 0,
-                            incubationPhaseDuration: 0,
-                            healSpeed: 0,
-                            stayingFor: getSkewedRandomValue(80, 180, 1),
-                            stayed: 0
-                        };
+                        if(grid[y][x].state !== STATES.WALL) {
+                            const isSick = Math.random() < initialSickPercentage;
+                            grid[y][x] = {
+                                state: isSick ? STATES.INCUBATING : STATES.HEALTHY,
+                                health: isSick ? 100 - getSeverityLevel() * incubationReducedSeverityMultiplier : 100,
+                                sickDays: 0,
+                                incubationPhaseDuration: 0,
+                                healSpeed: 0,
+                                stayingFor: getSkewedRandomValue(80, 180, 1),
+                                stayed: 0
+                            };
+                        }
                     }
                 }
             }
@@ -940,10 +952,16 @@ function calculateInfectionChance(x, y) {
 
 let simulationSpeed = 20; // Default speed
 let lastRenderTime = 0;
+let days = 0;
 
 document.getElementById('simulationSpeed').addEventListener('input', function() {
     simulationSpeed = parseInt(this.value);
 });
+
+// -------- Toastify for slow simulation --------
+
+var toastId = "toast_" + Date.now();
+let toastInstance = null;
 
 function gameLoop(currentTime) {
     if (isRunning) {
@@ -968,6 +986,23 @@ function gameLoop(currentTime) {
         }
         drawGrid();
         updateChart();
+        days++;
+        // when days go over 1000, create a toast to tell the user to click on Chart Reset
+        if(days == 1000){
+            toastId = "toast_" + Date.now();
+            toastInstance = Toastify({
+                text: "Simulation is getting slow, clearing the chart can help!",
+                duration: -1,
+                close: true,
+                gravity: "top", 
+                position: 'center',
+                style: {
+                    background: "linear-gradient(to right, #00b09b, #96c93d)"
+                },
+                stopOnFocus: true,
+            });
+            toastInstance.showToast(toastId);
+        }
     }
 }
 
@@ -988,8 +1023,6 @@ document.getElementById('toggleButton').addEventListener('click', () => {
 });
 
 document.getElementById('randomizeButton').addEventListener('click', () => {
-    // grid = createGrid(gridWidth, gridHeight);
-    // drawGrid();
     createRipplingGrid(gridWidth, gridHeight);
 });
 
