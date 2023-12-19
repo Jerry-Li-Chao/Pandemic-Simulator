@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Pandemic Simulator</title>
+    <link rel="icon" type="image/x-icon" href="image/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,16 +23,21 @@
                 <div class="healed-box"></div>
                 <span>Dead </span>
                 <div class="dead-box"></div>
+                <span>Barrier </span>
+                <div class="wall-box"></div>
             </div>
             <div id="toggleHealedColorDiv">
                 <label for="toggleHealedColor">Recovered Color is yellow</label>
                 <input type="checkbox" id="toggleHealedColor" checked>
+                <br/>
+                <label for="wallThicknessSlider">Paint Barrier (0 paints Infected):</label>
+                <input type="range" id="wallThicknessSlider" min="0" max="5" step="1" value="0">
+                <span id="wallThicknessValue">0</span>
             </div>
 
             <canvas id="gameCanvas"></canvas>
-            <ul class="bullet-list">
-                <li>Click on [Healthy], [Sick], ... to hide/show the line</li>
-            </ul>
+            <div id="chart-notice">Click on [Healthy], [Sick], ... to hide/show the line</div>
+
             <canvas id="populationChart"></canvas>
             <!-- make a unordered list of notices -->
             <button class="collapsible shake">Show Guide</button>

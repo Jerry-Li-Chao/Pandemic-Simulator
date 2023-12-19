@@ -26,9 +26,9 @@ body {
     justify-content: space-evenly;
     /* center children */
     align-items: center;
-    background-color: rgba(218, 218, 218, 0.4);
+    background-color: rgba(151, 151, 151, 0.5);
     /* round edges */
-    border-radius: 5px;
+    border-radius: 10px;
 }
 
 /* Define the gradient background for the .gradient-box element */
@@ -44,10 +44,11 @@ body {
     background: yellow;
 }
 
-.healed-box {
+
+.wall-box {
     width: 10px;
     height: 10px;
-    background: yellow; /* Default color */
+    background: white;
 }
 
 /* Additional CSS classes for color toggling */
@@ -113,25 +114,13 @@ ul {
     display: none; /* Initially hide the list */
 }
 
-
-.bullet-list li:before {
-    content: "\2022"; /* Use a bullet point character */
-    color: #000000; /* Customize the bullet point color */
-    font-size: 15px;
-    margin-right: 10px;
-}
-
-.bullet-list li {
-    font-size: 14px;
-    line-height: 1.5;
-    margin: 5px 10px 5px 5px;
-    padding: 5px 10px 5px 10px;
-    width: fit-content;
+#chart-notice {
     background-color: rgba(250, 160, 255, 0.1);
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
+    padding: 5px 10px;
+    margin: auto;
+    width: fit-content;
+    font-size: small;
+    border-radius: 10px;
 }
 
 .collapsible-list li {
@@ -140,7 +129,7 @@ ul {
     margin: 5px 0px;
     padding: 5px 5px;
     background-color: rgba(250, 160, 255, 0.1);
-    border-radius: 5px;
+    border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
@@ -162,7 +151,7 @@ ul {
     outline: none;
     font-weight: bold;
     transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
-    border-radius: 5px;
+    border-radius: 10px;
 }
 
 .collapsible.active {
@@ -188,7 +177,7 @@ ul {
     background-color: rgba(128, 128, 128, 0.2);
     padding: 5px 10px;
     /* round edges */
-    border-radius: 5px;
+    border-radius: 10px;
     /* children in a column */
     display: flex;
     flex-direction: column;
@@ -200,7 +189,7 @@ ul {
     background-color: rgba(0, 246, 255, 0.2);
     padding: 5px 10px;
     /* round edges */
-    border-radius: 5px;    
+    border-radius: 10px; 
 }
 
 #infectionRateDiv {
@@ -209,7 +198,7 @@ ul {
     background-color: rgba(255, 0, 0, 0.2);
     padding: 5px 10px;
     /* round edges */
-    border-radius: 5px;
+    border-radius: 10px;
 
 }
 
@@ -219,7 +208,7 @@ ul {
     background-color: rgba(0, 0, 255, 0.2);
     padding: 5px 10px;
     /* round edges */
-    border-radius: 5px;
+    border-radius: 10px;
 
 }
 
@@ -229,7 +218,7 @@ ul {
     background-color: rgba(255, 255, 0, 0.2);
     padding: 5px 10px;
     /* round edges */
-    border-radius: 5px;
+    border-radius: 10px;
 }
 
 #healChanceDiv {
@@ -238,7 +227,7 @@ ul {
     background-color: rgba(0, 255, 0, 0.2);
     padding: 5px 10px;
     /* round edges */
-    border-radius: 5px;
+    border-radius: 10px;
 }
 
 #incubationDiv {
@@ -247,7 +236,7 @@ ul {
     background-color: rgba(255, 165, 0, 0.2);
     padding: 5px 10px;
     /* round edges */
-    border-radius: 5px;
+    border-radius: 10px;
     
 }
 
@@ -286,11 +275,17 @@ ul {
     flex-direction: column;
     flex: 0 1 60%;
     margin: 0 2%;
-    border-radius: 5px;
+    border-radius: 10px;
 }
 
 /* media queries */
 @media screen and (max-width: 768px) {
+    .health-box {
+        width: 70px;
+        height: 10px;
+        background: linear-gradient(to right, rgb(0, 255, 85), rgb(255, 0, 0));
+    }
+
     #controlsAndCharts {
         flex-direction: column;
         /* center children */
@@ -309,7 +304,7 @@ ul {
         margin: 0 0 5% 0;
         display: flex;
         flex-direction: column;
-        border-radius: 5px;
+        border-radius: 10px;
     }
 }
 
@@ -328,7 +323,7 @@ h1 {
 }
 
 #controls button {
-    border-radius: 5px;
+    border-radius: 10px;
     margin: 5px 2px;
     padding: 10px 10px;
     border-width: 1px;

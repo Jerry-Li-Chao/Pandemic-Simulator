@@ -9,7 +9,8 @@ const STATES = {
     SYMPTOMATIC: 'symptomatic', // New state for symptomatic phase
     DEAD: 'dead', 
     HEALING: 'healing',
-    HEALED: 'healed'
+    HEALED: 'healed',
+    WALL: 'wall'
 };
 
 let daysWithoutRemoval = 0;
@@ -374,33 +375,48 @@ function getHealChance() {
 }
 
 
+
+// Get references to the slider and the span element
+var slider = document.getElementById("wallThicknessSlider");
+var output = document.getElementById("wallThicknessValue");
+
 let mouseIsDown = false;
-let keyIsPressed = false;
+let PaintInfected = slider.value == '0';
 
-// Event listener for key down
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Shift') { // Choose the key to use (e.g., Shift)
-        keyIsPressed = true;
-    }
-});
 
-// Event listener for key up
-document.addEventListener('keyup', function(event) {
-    if (event.key === 'Shift') { // Same key as above
-        keyIsPressed = false;
-    }
-});
+// Display the default slider value
+output.innerHTML = slider.value;
+
+let drawWallIsPressed = slider.value !== '0';
+let drawWallThickness = slider.value;
+output.innerHTML = slider.value; // Display the default slider value
+
+// Update the value in the span element whenever the slider value changes
+slider.oninput = function() {
+    output.innerHTML = this.value;
+    drawWallIsPressed = this.value !== '0';
+    PaintInfected = this.value == '0';
+    drawWallThickness = this.value;
+}
 
 // Event listener for mouse down on the canvas
 canvas.addEventListener('mousedown', function(event) {
     mouseIsDown = true;
-    infectCell(event);
+    if (mouseIsDown && PaintInfected) {
+        infectCell(event);
+    }
+    else if(mouseIsDown && drawWallIsPressed) {
+        drawWall(event);
+    }
 });
 
 // Event listener for mouse move on the canvas
 canvas.addEventListener('mousemove', function(event) {
-    if (mouseIsDown && keyIsPressed) {
+    if (mouseIsDown && PaintInfected) {
         infectCell(event);
+    }
+    else if(mouseIsDown && drawWallIsPressed) {
+        drawWall(event);
     }
 });
 
@@ -425,7 +441,12 @@ canvas.addEventListener('touchstart', function(event) {
     }
     if (event.touches.length > 0) {
         const mockEvent = createMockEvent(event.touches[0], canvas);
-        infectCell(mockEvent);
+        if(drawWallIsPressed) {
+            drawWall(mockEvent);
+        }
+        else{
+            infectCell(mockEvent);
+        }
     }
 }, { passive: false });
 
@@ -436,7 +457,12 @@ canvas.addEventListener('touchmove', function(event) {
     }
     if (event.touches.length > 0) {
         const mockEvent = createMockEvent(event.touches[0], canvas);
-        infectCell(mockEvent);
+        if(drawWallIsPressed) {
+            drawWall(mockEvent);
+        }
+        else{
+            infectCell(mockEvent);
+        }
     }
 }, { passive: false });
 
@@ -465,7 +491,7 @@ document.getElementById('makeAllHealthyButton').addEventListener('click', functi
                 }
             }
             drawGrid();
-        }, d * 75); // Delay of 75ms between each ring
+        }, d * 50); // Delay of 50ms between each ring
     }
 });
 
@@ -496,6 +522,30 @@ function infectCell(event) {
         }
     }
 }
+
+
+function drawWall(event) {
+    if (!isRunning) {
+        const rect = canvas.getBoundingClientRect();
+        const centerX = Math.floor((event.clientX - rect.left) / cellSize);
+        const centerY = Math.floor((event.clientY - rect.top) / cellSize);
+
+        // Calculate start and end points for the loop
+        const startOffset = Math.floor(drawWallThickness / 2);
+        const endOffset = drawWallThickness % 2 === 0 ? startOffset - 1 : startOffset;
+
+        for (let y = centerY - startOffset; y <= centerY + endOffset; y++) {
+            for (let x = centerX - startOffset; x <= centerX + endOffset; x++) {
+                if (grid[y] && grid[y][x]) {
+                    grid[y][x].state = STATES.WALL;
+                }
+            }
+        }
+
+        drawGrid();
+    }
+}
+
 
 
 let grid = createGrid(gridWidth, gridHeight);
@@ -547,7 +597,7 @@ function createRipplingGrid(width, height) {
                 }
             }
             drawGrid(); // Redraw the grid after each update
-        }, d * 75); // Delay of 75ms between each ring
+        }, d * 50); // Delay of 50ms between each ring
     }
 }
 
@@ -680,7 +730,7 @@ let unchangedIterations = 0;
 
 function updateChart() {
     let healthyCount = 0, sickCount = 0, healedCount = 0, deadCount = 0, healingCount = 0;
-    let totalHealth = 0, totalCells = gridWidth * gridHeight;
+    let totalHealth = 0, totalCells = 0;
 
     for (let y = 0; y < gridHeight; y++) {
         for (let x = 0; x < gridWidth; x++) {
@@ -705,7 +755,11 @@ function updateChart() {
                     deadCount++;
                     break;
             }
-            totalHealth += grid[y][x].health;
+            if(grid[y][x].state != STATES.WALL) {
+                totalHealth += grid[y][x].health;
+                totalCells++;
+            }
+            
         }
     }
 
@@ -788,6 +842,9 @@ function drawGrid() {
                     break;
                 case STATES.DEAD:
                     ctx.fillStyle = 'black';
+                    break;
+                case STATES.WALL:
+                    ctx.fillStyle = 'white';
                     break;
             }
             ctx.fill();
